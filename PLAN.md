@@ -119,6 +119,16 @@ pioyan-chat/
 - [x] README.md 書き替え
 - [x] `human_docs/architecture.md` 更新
 
+### Phase 4: コーディングボット（GitHub Copilot SDK 連携）
+
+- [x] `backend/app/models/bot.py` — Bot Pydantic モデル（TDD）
+- [x] `backend/app/bots/validator.py` — Dockerfile / Containerfile バリデーター（TDD）
+- [x] `backend/app/routers/bots.py` — ボット CRUD + コンテナファイルアップロード（TDD）
+- [x] `frontend/src/types/index.ts` — Bot 型定義追加
+- [x] `frontend/src/lib/api.ts` — botsApi クライアント追加
+- [ ] ボット実行エンジン（コンテナビルド + Copilot SDK 統合）
+- [ ] ボット管理 UI（フロントエンド）
+
 ## API エンドポイント一覧
 
 ### 認証
@@ -166,6 +176,16 @@ pioyan-chat/
 |--------|------------------|-------------------|
 | POST   | /api/files/upload | ファイルアップロード |
 
+### ボット
+
+| Method | Path               | 説明                                        |
+|--------|--------------------|---------------------------------------------|
+| POST   | /api/bots          | ボット登録（コンテナファイルアップロード付き）  |
+| GET    | /api/bots          | ボット一覧                                   |
+| GET    | /api/bots/{id}     | ボット詳細                                   |
+| DELETE | /api/bots/{id}     | ボット削除                                   |
+| POST   | /api/bots/validate | コンテナファイルバリデーション（登録なし）      |
+
 ## Socket.IO イベント
 
 | イベント       | 方向           | 説明                         |
@@ -188,3 +208,4 @@ pioyan-chat/
 | MongoDB 検索           | MongoDB ネイティブテキストインデックス（MVP）。全文検索エンジンは将来対応 |
 | Redis（スケーリング）   | MVP では不要。単一プロセス運用。将来 Socket.IO Adapter として追加 |
 | コンテナ化             | MongoDB のみ Docker Compose でコンテナ化。アプリは Dev Container 内で直接実行 |
+| ボットコンテナ          | Dockerfile/Containerfile をアップロードし、バリデーション後に保存。将来的に Docker Build + GitHub Copilot SDK でコンテナ内コーディング |

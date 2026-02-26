@@ -1,6 +1,6 @@
 /** Typed API client for pioyan-chat backend. */
 
-import type { AuthTokenResponse, Channel, Message, User } from "@/types";
+import type { AuthTokenResponse, Bot, BotValidateResponse, Channel, Message, User } from "@/types";
 import { getToken } from "./auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -150,3 +150,43 @@ export const filesApi = {
 };
 
 export { ApiError };
+
+// ── Bots ──────────────────────────────────────────────────────
+export const botsApi = {
+  list: () => request<Bot[]>("/api/bots"),
+  get: (id: string) => request<Bot>(`/api/bots/${id}`),
+  register: async (name: string, containerFile: File, description?: string) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("container_file", containerFile);
+    if (description) formData.append("description", description);
+    const res = await fetch(`${BASE_URL}/api/bots`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new ApiError(res.status, body.detail ?? res.statusText);
+    }
+    return res.json() as Promise<Bot>;
+  },
+  delete: (id: string) =>
+    request<void>(`/api/bots/${id}`, { method: "DELETE" }),
+  validate: async (containerFile: File) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append("container_file", containerFile);
+    const res = await fetch(`${BASE_URL}/api/bots/validate`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new ApiError(res.status, body.detail ?? res.statusText);
+    }
+    return res.json() as Promise<BotValidateResponse>;
+  },
+};
