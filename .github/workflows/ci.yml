@@ -43,6 +43,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ibiqlik/action-yamllint@v3
         with:
+          file_or_dir: .
           config_data: |
             extends: default
             rules:
@@ -50,6 +51,8 @@ jobs:
                 max: 200
               truthy:
                 check-keys: false
+            ignore: |
+              frontend/pnpm-lock.yaml
 
   # ── シークレット漏洩検知 ──
   gitleaks:
@@ -73,3 +76,123 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: crate-ci/typos@master
+
+  # ============================================================
+  # バックエンド (Python / FastAPI)
+  # ============================================================
+
+  backend-lint:
+    name: backend-lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - run: pip install -e '.[dev]'
+      - run: ruff check .
+      - run: ruff format --check .
+
+  backend-test:
+    name: backend-test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password
+        options: >-
+          --health-cmd "mongosh --eval \"db.adminCommand('ping')\""
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      MONGO_URL: mongodb://admin:password@localhost:27017/pioyan_chat_test?authSource=admin
+      JWT_SECRET: ci-test-secret-32-chars-long-here
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - run: pip install -e '.[dev]'
+      - run: pytest --tb=short -q
+
+  # ============================================================
+  # フロントエンド (Next.js / Node.js)
+  # ============================================================
+
+  frontend-lint:
+    name: frontend-lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  frontend-test:
+    name: frontend-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  frontend-build:
+    name: frontend-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_SOCKET_URL: http://localhost:8000
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build

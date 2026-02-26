@@ -1,18 +1,27 @@
 // Dev Container 設定
 // 詳細: https://containers.dev/implementors/json_reference/
 {
-  "name": "develop-base",
+  "name": "pioyan-chat",
   "image": "mcr.microsoft.com/devcontainers/universal:5.1.4",
 
   // ── Features ──
-  // gh CLI・Docker-outside-of-Docker を追加
+  // gh CLI・Docker-outside-of-Docker・Node.js (pnpm 用)・Python を追加
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1.1.0": {},
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1.6.5": {}
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1.6.5": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22",
+      "nodeGypDependencies": false
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.13",
+      "installTools": true
+    }
   },
 
   // ── 初回セットアップ ──
-  "postCreateCommand": "echo '✅ Dev Container ready. Run: gh auth login'",
+  // pnpm の有効化 + フロントエンド依存インストール + バックエンド依存インストール
+  "postCreateCommand": "corepack enable && cd frontend && pnpm install --frozen-lockfile 2>/dev/null || true && cd ../backend && pip install -e '.[dev]' && echo '✅ pioyan-chat Dev Container ready. Run: docker compose up -d && gh auth login'",
 
   // ── VS Code カスタマイズ ──
   "customizations": {
@@ -24,10 +33,39 @@
         "DavidAnson.vscode-markdownlint",
         "redhat.vscode-yaml",
         "streetsidesoftware.code-spell-checker",
-        "EditorConfig.EditorConfig"
+        "EditorConfig.EditorConfig",
+        // ── TypeScript / Node.js ──
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "yoavbls.pretty-ts-errors",
+        // ── Python ──
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+        "charliermarsh.ruff"
       ],
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        // Python
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+          }
+        },
+        // TypeScript / TSX
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode",
+          "editor.formatOnSave": true
+        }
       }
     }
   }

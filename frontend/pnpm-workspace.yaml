@@ -1,0 +1,5 @@
+packages:
+  - "."
+ignoreBuiltDependencies:
+  - sharp
+  - unrs-resolver
