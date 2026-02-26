@@ -7,7 +7,6 @@ from jose import JWTError, jwt
 
 from app.config import settings
 
-
 # ── Password ──────────────────────────────────────────────────────────────────
 
 

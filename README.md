@@ -13,13 +13,6 @@ pioyan-chat は pioyan が開発するリアルタイムチャットアプリで
 ### 前提条件
 
 - [VS Code](https://code.visualstudio.com/) + [Dev Containers 拡張](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-- [Docker](https://www.docker.com/)（Dev Container・MCP サーバー実行用）
-
-<!-- TODO: 技術スタック確定後に追加の前提条件を記入してください -->
-
-### 前提条件
-
-- [VS Code](https://code.visualstudio.com/) + [Dev Containers 拡張](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 - [Docker](https://www.docker.com/)
 
 ### Dev Container で開始（推奨）
