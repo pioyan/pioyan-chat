@@ -1,0 +1,51 @@
+name: ✨ 機能要望
+description: 新しい機能や改善を提案してください
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        機能要望をお寄せいただきありがとうございます。
+        提案の背景や期待する効果をできるだけ詳しく記載してください。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解決したい課題
+      description: この機能で解決したい問題や課題を説明してください
+      placeholder: "〜するときに、〜で困っています..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 提案する解決策
+      description: どのような機能・改善を望んでいるかを説明してください
+      placeholder: こういう機能があると嬉しいです...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 検討した代替案
+      description: 他に検討した解決方法があれば記載してください
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 補足情報
+      description: スクリーンショット、参考リンク、ユースケースなど追加情報があれば記載してください
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: search
+    attributes:
+      label: 既存の Issue の確認
+      options:
+        - label: 同様の機能要望が既に報告されていないことを確認しました
+          required: true

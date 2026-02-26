@@ -1,0 +1,33 @@
+{
+    // ── Agent 基本設定 ──
+    "chat.agent.maxRequests": 1000,
+    "chat.agentSessionProjection.enabled": true,
+    "chat.checkpoints.showFileChanges": true,
+    "chat.tools.terminal.autoReplyToPrompts": true,
+    "inlineChat.defaultModel": "Auto (copilot)",
+
+    // ── サブエージェント連携 ──
+    // メインエージェントから .github/agents/ のカスタムエージェントを呼び出し可能にする
+    "chat.customAgentInSubagent.enabled": true,
+
+    // ── Copilot Hooks ──
+    // コード生成・編集後に自動で品質チェックを実行する
+    "chat.useClaudeHooks": true,
+    "github.copilot.chat.codeGeneration.hooks": {
+        "postSave": [
+            {
+                "command": "markdownlint ${file}",
+                "filePattern": "**/*.md"
+            },
+            {
+                "command": "yamllint ${file}",
+                "filePattern": "**/*.{yml,yaml}"
+            }
+        ],
+        "postCommand": [
+            {
+                "command": "typos --format brief ${file}"
+            }
+        ]
+    }
+}

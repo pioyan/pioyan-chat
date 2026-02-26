@@ -1,0 +1,17 @@
+# CODEOWNERS — コードオーナー定義
+#
+# このファイルは PR のレビュアーを自動割り当てするために使用されます。
+# 詳細: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# パターン  オーナー
+# ───────────────────────────
+
+# デフォルト: すべてのファイル
+*                       @pioyan
+
+# GitHub 設定・テンプレート
+.github/                @pioyan
+
+# ドキュメント
+*.md                    @pioyan
+docs/                   @pioyan

@@ -1,0 +1,51 @@
+{
+  // VS Code MCP サーバー設定
+  // ローカル開発環境で使用する MCP サーバーを定義します。
+  // 詳細: https://code.visualstudio.com/docs/copilot/customization/mcp-servers
+  //
+  // ⚠️ MCP サーバーはローカルで任意のコードを実行できます。
+  //    信頼できるサーバーのみを追加してください。
+  "servers": {
+    // ── GitHub MCP Server ──
+    // GitHub のリポジトリ、Issue、PR などを操作するための公式 MCP サーバー。
+    // セットアップ: https://github.com/github/github-mcp-server
+    "github": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github-pat}"
+      }
+    },
+
+    // ── Context7 MCP Server ──
+    // ライブラリのドキュメントを取得するための MCP サーバー。
+    // 各エージェントが技術ドキュメントを参照する際に利用します。
+    // セットアップ: https://github.com/upstash/context7
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+
+    // ── 追加の MCP サーバー例 ──
+    //
+    // "filesystem": {
+    //   "type": "stdio",
+    //   "command": "npx",
+    //   "args": ["-y", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
+    // }
+  },
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "github-pat",
+      "description": "GitHub Personal Access Token (repo, read:org スコープ推奨)",
+      "password": true
+    }
+  ]
+}
