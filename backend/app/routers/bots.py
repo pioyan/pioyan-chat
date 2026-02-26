@@ -1,13 +1,15 @@
 """Bots router: coding bot registration with container file upload."""
 
 import os
+import re
 import uuid
 from datetime import UTC, datetime
 
 import aiofiles
 from bson import ObjectId
+from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.auth.dependencies import get_current_user
 from app.bots.validator import validate_container_file
@@ -19,13 +21,6 @@ from app.models.user import UserPublic
 router = APIRouter()
 
 # ── Request / Response models ─────────────────────────────────
-
-
-class BotCreateRequest(BaseModel):
-    """Multipart-compatible model; actual fields come as form data."""
-
-    name: str = Field(..., min_length=1, max_length=100)
-    description: str | None = Field(default=None, max_length=500)
 
 
 class BotValidateResponse(BaseModel):
@@ -46,6 +41,20 @@ def _doc_to_public(doc: dict) -> BotPublic:
         status=doc.get("status", BotStatus.registered),
         created_at=doc["created_at"],
     )
+
+
+def _safe_object_id(bot_id: str) -> ObjectId:
+    """Convert string to ObjectId, raising 404 for invalid IDs."""
+    try:
+        return ObjectId(bot_id)
+    except InvalidId as err:
+        raise HTTPException(status_code=404, detail="Bot not found") from err
+
+
+def _sanitize_filename(name: str) -> str:
+    """Remove path traversal characters and keep only safe filename chars."""
+    basename = os.path.basename(name)
+    return re.sub(r"[^\w.\-]", "_", basename)
 
 
 # ── Endpoints ──────────────────────────────────────────────────
@@ -83,7 +92,8 @@ async def register_bot(
 
     # ── Persist container file ─────────────────────────────────
     original_name = container_file.filename or "Dockerfile"
-    stored_name = f"{uuid.uuid4().hex}_{original_name}"
+    safe_name = _sanitize_filename(original_name)
+    stored_name = f"{uuid.uuid4().hex}_{safe_name}"
     save_dir = settings.container_files_dir
     os.makedirs(save_dir, exist_ok=True)
     save_path = os.path.join(save_dir, stored_name)
@@ -123,7 +133,8 @@ async def get_bot(
 ) -> BotPublic:
     """Get details of a specific bot."""
     db = get_db()
-    doc = await db["bots"].find_one({"_id": ObjectId(bot_id), "owner_id": current_user.id})
+    oid = _safe_object_id(bot_id)
+    doc = await db["bots"].find_one({"_id": oid, "owner_id": current_user.id})
     if doc is None:
         raise HTTPException(status_code=404, detail="Bot not found")
     return _doc_to_public(doc)
@@ -136,7 +147,8 @@ async def delete_bot(
 ) -> None:
     """Delete a bot and its container file."""
     db = get_db()
-    doc = await db["bots"].find_one({"_id": ObjectId(bot_id), "owner_id": current_user.id})
+    oid = _safe_object_id(bot_id)
+    doc = await db["bots"].find_one({"_id": oid, "owner_id": current_user.id})
     if doc is None:
         raise HTTPException(status_code=404, detail="Bot not found")
 
@@ -145,7 +157,7 @@ async def delete_bot(
     if file_path and os.path.exists(file_path):
         os.remove(file_path)
 
-    await db["bots"].delete_one({"_id": ObjectId(bot_id)})
+    await db["bots"].delete_one({"_id": oid})
 
 
 @router.post("/validate", response_model=BotValidateResponse)

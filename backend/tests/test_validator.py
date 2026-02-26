@@ -76,7 +76,5 @@ class TestValidateContainerFile:
 
     def test_case_insensitive_instructions(self):
         content = 'from python:3.13\nrun echo hello\ncmd ["python"]\n'
-        # Lowercase instructions are not standard but we match case-insensitively
-        # Actually our regex matches [A-Za-z]+ so it should work
         errors = validate_container_file(content)
         assert errors == []

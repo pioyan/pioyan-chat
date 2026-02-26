@@ -89,7 +89,7 @@ def validate_container_file(content: str) -> list[str]:
         if instruction == "FROM":
             has_from = True
             # Validate FROM has an image reference
-            from_args = stripped[len("FROM") :].strip()
+            from_args = stripped[instruction_match.end() :].strip()
             if not from_args:
                 errors.append(f"Line {line_num}: FROM requires an image reference")
 

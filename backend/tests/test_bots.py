@@ -164,6 +164,10 @@ class TestBotListAndGet:
         res = await auth_client.get("/api/bots/000000000000000000000000")
         assert res.status_code == 404
 
+    async def test_get_bot_invalid_id(self, auth_client: AsyncClient):
+        res = await auth_client.get("/api/bots/not-a-valid-id")
+        assert res.status_code == 404
+
 
 class TestBotDeletion:
     """Tests for DELETE /api/bots/{id}."""
@@ -186,4 +190,8 @@ class TestBotDeletion:
 
     async def test_delete_bot_not_found(self, auth_client: AsyncClient):
         res = await auth_client.delete("/api/bots/000000000000000000000000")
+        assert res.status_code == 404
+
+    async def test_delete_bot_invalid_id(self, auth_client: AsyncClient):
+        res = await auth_client.delete("/api/bots/not-a-valid-id")
         assert res.status_code == 404
