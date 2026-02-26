@@ -8,8 +8,10 @@ import { authApi, channelsApi, dmApi, messagesApi } from "@/lib/api";
 import { isAuthenticated } from "@/lib/auth";
 import { useSocket } from "@/hooks/useSocket";
 import { useChatStore } from "@/stores/chatStore";
+import type { Channel } from "@/types";
 import MessageInput from "@/components/MessageInput";
 import MessageList from "@/components/MessageList";
+import ProfileModal from "@/components/ProfileModal";
 import SearchModal from "@/components/SearchModal";
 import Sidebar from "@/components/Sidebar";
 import ThreadPanel from "@/components/ThreadPanel";
@@ -19,9 +21,11 @@ export default function ChatPage() {
   const {
     channels,
     currentChannelId,
+    currentUser,
     messages,
     threadMessageId,
     setChannels,
+    addChannel,
     setCurrentUser,
     setMessages,
     setCurrentChannel,
@@ -30,6 +34,7 @@ export default function ChatPage() {
   const [dms, setDms] = useState(
     useChatStore.getState().channels.filter((c) => c.is_direct),
   );
+  const [profileOpen, setProfileOpen] = useState(false);
 
   // Socket.IO 接続
   useSocket();
@@ -69,6 +74,11 @@ export default function ChatPage() {
     });
   }, [currentChannelId, setMessages]);
 
+  const handleChannelCreated = (channel: Channel) => {
+    addChannel(channel);
+    setCurrentChannel(channel.id);
+  };
+
   const currentChannel = channels.find((c) => c.id === currentChannelId);
   const currentMessages = currentChannelId
     ? (messages[currentChannelId] ?? [])
@@ -81,6 +91,9 @@ export default function ChatPage() {
         channels={channels.filter((c) => !c.is_direct)}
         dms={dms}
         currentChannelId={currentChannelId}
+        currentUser={currentUser}
+        onChannelCreated={handleChannelCreated}
+        onProfileClick={() => setProfileOpen(true)}
       />
 
       {/* Main content */}
@@ -119,6 +132,18 @@ export default function ChatPage() {
 
       {/* Search modal */}
       <SearchModal />
+
+      {/* Profile modal */}
+      {profileOpen && currentUser && (
+        <ProfileModal
+          user={currentUser}
+          onClose={() => setProfileOpen(false)}
+          onUpdated={(updated) => {
+            setCurrentUser(updated);
+            setProfileOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

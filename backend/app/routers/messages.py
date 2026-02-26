@@ -1,5 +1,6 @@
 """Messages router: CRUD + pagination + search + thread."""
 
+import contextlib
 from datetime import UTC, datetime
 
 from bson import ObjectId
@@ -17,11 +18,30 @@ channel_messages_router = APIRouter()
 router = APIRouter()
 
 
-def _doc_to_message(doc: dict) -> MessagePublic:
+async def _user_map(db, sender_ids: list[str]) -> dict[str, dict]:
+    """sender_id のリストからユーザー情報マップを返す。"""
+    oids = []
+    for sid in sender_ids:
+        with contextlib.suppress(Exception):
+            oids.append(ObjectId(sid))
+    if not oids:
+        return {}
+    users = {}
+    async for u in db["users"].find({"_id": {"$in": oids}}):
+        users[str(u["_id"])] = u
+    return users
+
+
+def _doc_to_message(doc: dict, users: dict[str, dict] | None = None) -> MessagePublic:
+    sender_id = doc["sender_id"]
+    user = (users or {}).get(sender_id, {})
+    sender_username: str = user.get("username") or user.get("email") or sender_id
     return MessagePublic(
         id=str(doc["_id"]),
         channel_id=doc["channel_id"],
-        sender_id=doc["sender_id"],
+        sender_id=sender_id,
+        sender_username=sender_username,
+        sender_avatar_url=user.get("avatar_url"),
         content=doc["content"],
         file_url=doc.get("file_url"),
         thread_id=doc.get("thread_id"),
@@ -54,7 +74,9 @@ async def search_messages(
         .sort([("score", {"$meta": "textScore"})])
         .limit(50)
     )
-    return [_doc_to_message(doc) async for doc in cursor]
+    docs = [doc async for doc in cursor]
+    users = await _user_map(db, [d["sender_id"] for d in docs])
+    return [_doc_to_message(d, users) for d in docs]
 
 
 @channel_messages_router.get("/channels/{channel_id}/messages", response_model=list[MessagePublic])
@@ -70,7 +92,9 @@ async def list_messages(
     if before:
         query["_id"] = {"$lt": _object_id(before)}
     cursor = db["messages"].find(query).sort("created_at", 1).limit(limit)
-    return [_doc_to_message(doc) async for doc in cursor]
+    docs = [doc async for doc in cursor]
+    users = await _user_map(db, [d["sender_id"] for d in docs])
+    return [_doc_to_message(d, users) for d in docs]
 
 
 @channel_messages_router.post(
@@ -96,7 +120,10 @@ async def post_message(
     }
     result = await db["messages"].insert_one(doc)
     doc["_id"] = result.inserted_id
-    return _doc_to_message(doc)
+    users = {
+        current_user.id: {"username": current_user.username, "avatar_url": current_user.avatar_url}
+    }
+    return _doc_to_message(doc, users)
 
 
 @router.delete("/{message_id}", status_code=204)
@@ -121,7 +148,9 @@ async def get_thread(
     """Return thread replies for a message."""
     db = get_db()
     cursor = db["messages"].find({"thread_id": message_id}).sort("created_at", 1)
-    return [_doc_to_message(doc) async for doc in cursor]
+    docs = [doc async for doc in cursor]
+    users = await _user_map(db, [d["sender_id"] for d in docs])
+    return [_doc_to_message(d, users) for d in docs]
 
 
 @router.post("/{message_id}/thread", response_model=MessagePublic, status_code=201)
@@ -152,4 +181,7 @@ async def post_thread_reply(
     doc["_id"] = result.inserted_id
     # 親のreply_countをインクリメント
     await db["messages"].update_one({"_id": oid}, {"$inc": {"reply_count": 1}})
-    return _doc_to_message(doc)
+    users = {
+        current_user.id: {"username": current_user.username, "avatar_url": current_user.avatar_url}
+    }
+    return _doc_to_message(doc, users)

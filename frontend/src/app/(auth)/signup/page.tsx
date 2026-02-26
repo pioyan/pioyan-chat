@@ -21,7 +21,7 @@ export default function SignupPage() {
     setLoading(true);
     try {
       const { access_token } = await authApi.signup({
-        username,
+        username: username.trim() || undefined,
         email,
         password,
       });
@@ -43,15 +43,15 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              ユーザー名
+              ユーザー名（任意）
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
               minLength={2}
-              maxLength={32}
+              maxLength={64}
+              placeholder="省略するとメールアドレスが使われます"
               className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-violet-500"
             />
           </div>

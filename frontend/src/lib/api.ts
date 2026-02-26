@@ -36,7 +36,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 // ── Auth ──────────────────────────────────────────────────────
 export const authApi = {
-  signup: (data: { username: string; email: string; password: string }) =>
+  signup: (data: { username?: string; email: string; password: string }) =>
     request<AuthTokenResponse>("/api/auth/signup", {
       method: "POST",
       body: JSON.stringify(data),
@@ -49,6 +49,12 @@ export const authApi = {
     }),
 
   me: () => request<User>("/api/auth/me"),
+
+  updateMe: (data: { username?: string; avatar_url?: string }) =>
+    request<User>("/api/auth/me", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 };
 
 // ── Channels ──────────────────────────────────────────────────

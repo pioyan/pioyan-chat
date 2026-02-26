@@ -15,24 +15,36 @@ export default function MessageItem({ message, onThreadClick }: Props) {
     minute: "2-digit",
   });
 
+  const displayName = message.sender_username;
+  const avatarLetter = displayName[0]?.toUpperCase() ?? "?";
+
   return (
     <div className="group flex gap-3 px-4 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded">
-      {/* Avatar placeholder */}
-      <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center text-white text-xs font-bold">
-        {message.sender_id.slice(0, 2).toUpperCase()}
-      </div>
+      {/* Avatar */}
+      {message.sender_avatar_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={message.sender_avatar_url}
+          alt={displayName}
+          className="mt-1 shrink-0 w-8 h-8 rounded-full object-cover"
+        />
+      ) : (
+        <div className="mt-1 shrink-0 w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center text-white text-xs font-bold">
+          {avatarLetter}
+        </div>
+      )}
 
       <div className="flex-1 min-w-0">
         {/* Header */}
         <div className="flex items-baseline gap-2">
           <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
-            {message.sender_id}
+            {displayName}
           </span>
           <span className="text-xs text-zinc-400">{time}</span>
         </div>
 
         {/* Content */}
-        <p className="text-sm text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap break-words">
+        <p className="text-sm text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap wrap-break-word">
           {message.content}
         </p>
 

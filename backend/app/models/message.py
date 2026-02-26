@@ -17,6 +17,8 @@ class MessagePublic(MessageBase):
     id: str
     channel_id: str
     sender_id: str
+    sender_username: str
+    sender_avatar_url: str | None = None
     file_url: str | None = None
     thread_id: str | None = None
     reply_count: int = 0
