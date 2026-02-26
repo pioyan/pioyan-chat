@@ -1,14 +1,18 @@
-# Copilot カスタム指示 — sample-app
+# Copilot カスタム指示 — pioyan-chat
 
 ## プロジェクト概要
 
-sample-app は pioyan が開発するサンプルプロジェクトです。
+pioyan-chat は pioyan が開発する Slack 風リアルタイムチャットアプリケーションです。
+詳細な構築計画は [PLAN.md](../PLAN.md) を参照してください。
 
 ## リポジトリ構成
 
-```
+```text
+frontend/                # Next.js 15 (React + TypeScript + Tailwind CSS)
+backend/                 # FastAPI + Socket.IO + Motor (async MongoDB)
+docker-compose.yml       # MongoDB 7 サービス定義
 .devcontainer/
-└── devcontainer.json    # Dev Container 設定（gh CLI・推奨拡張）
+└── devcontainer.json    # Dev Container 設定（Node.js 22・Python 3.13・gh CLI・推奨拡張）
 .github/
 ├── agents/              # Custom Agents（Agent Builder・Repo Guardian・Code Reviewer・Docs Writer）
 ├── skills/              # Agent Skills（監査・適用・CI・Dependabot・Git ワークフロー）
@@ -16,7 +20,7 @@ sample-app は pioyan が開発するサンプルプロジェクトです。
 ├── workflows/           # GitHub Actions CI
 ├── ISSUE_TEMPLATE/      # Issue テンプレート
 ├── CODEOWNERS           # コードオーナー
-├── dependabot.yml       # 依存自動更新
+├── dependabot.yml       # 依存自動更新（Actions / npm / pip）
 └── PULL_REQUEST_TEMPLATE.md
 .vscode/
 ├── settings.json        # エージェント・Hooks 設定
@@ -24,6 +28,7 @@ sample-app は pioyan が開発するサンプルプロジェクトです。
 └── mcp.json             # ローカル MCP サーバー設定
 agent_docs/              # AI エージェント向けリファレンス（自己参照用）
 human_docs/              # 人間向けドキュメント
+PLAN.md                  # チャットアプリ構築計画（フェーズ・API一覧・設計決定事項）
 ```
 
 ## コーディング規約
@@ -31,10 +36,39 @@ human_docs/              # 人間向けドキュメント
 - コミットメッセージは Conventional Commits に従う
 - ブランチ名は `<type>/<short-description>` 形式
 - PR は必ずテンプレートに従い、CI を通過させてからレビューを依頼する
+- アプリケーションコード（関数・クラス・モジュール）の新規作成・修正は TDD（t-wada 式 Red-Green-Refactor）で行う
 
 ## ビルド・テスト
 
-<!-- TODO: 技術スタック確定後に具体的なコマンドを追記 -->
+### フロントエンド (Next.js)
+
+```bash
+cd frontend
+pnpm dev          # 開発サーバー起動 (localhost:3000)
+pnpm build        # 本番ビルド
+pnpm test         # Vitest 単体テスト (run モード)
+pnpm test:watch   # Vitest watch モード
+pnpm lint         # ESLint
+```
+
+### バックエンド (FastAPI)
+
+```bash
+cd backend
+python -m uvicorn app.main:socket_app --reload --port 8000   # 開発サーバー起動
+pytest             # テスト実行
+ruff check .       # lint
+ruff format .      # フォーマット
+```
+
+### インフラ（Docker Compose）
+
+```bash
+docker compose up -d          # MongoDB + mongo-express 起動
+docker compose down -v        # 停止・ボリューム削除
+```
+
+mongo-express の管理 UI: <http://localhost:8081>
 
 ## CI
 
@@ -45,6 +79,11 @@ PR を作成すると以下の衛生チェックが自動実行されます:
 - **yamllint**: YAML の構文チェック
 - **gitleaks**: シークレット漏洩検知
 - **typos**: 誤字検知
+- **backend-lint**: Ruff（Python lint + format check）
+- **backend-test**: pytest（Python 3.12 / 3.13 matrix、MongoDB サービスコンテナ付き）
+- **frontend-lint**: ESLint（Next.js）
+- **frontend-test**: Vitest
+- **frontend-build**: Next.js 本番ビルド検証
 
 ## 開発環境
 
@@ -52,16 +91,21 @@ PR を作成すると以下の衛生チェックが自動実行されます:
 
 `.devcontainer/devcontainer.json` で統一された開発環境を提供します:
 
-- **ベースイメージ**: Microsoft Universal Image（言語非依存）
+- **ベースイメージ**: Microsoft Universal Image
+- **Node.js 22**: pnpm 対応（corepack 経由）
+- **Python 3.13**: pip 対応
 - **GitHub CLI**: `gh` コマンドが利用可能（初回は `gh auth login` で認証）
-- **Docker**: MCP サーバー等の実行に必要な Docker が利用可能
-- **推奨拡張**: コンテナ起動時に自動インストール
+- **Docker**: MongoDB 等のコンテナ実行に必要な Docker が利用可能
+- **推奨拡張**: コンテナ起動時に自動インストール（ESLint, Prettier, ms-python, Ruff 等）
+- **postCreateCommand**: pnpm install + pip install を自動実行
+
+初回起動後は `docker compose up -d` で MongoDB を起動してください。
 
 ### Copilot Hooks
 
 `.vscode/settings.json` で以下のフックが設定されています:
 
-- **postSave**: `.md` ファイル保存時に markdownlint、`.yml`/`.yaml` ファイル保存時に yamllint を自動実行
+- **postSave**: `.md` → markdownlint、`.yml/.yaml` → yamllint、`.py` → ruff fix、`frontend/**/*.{ts,tsx}` → ESLint fix
 - **postCommand**: コード変更後に typos チェックを自動実行
 
 コード生成・編集のたびに品質チェックが自動で走るため、手動での lint 実行は不要です。
@@ -77,6 +121,7 @@ PR を作成すると以下の衛生チェックが自動実行されます:
 
 | エージェント | 用途 |
 |------------|------|
+| `@feature-builder` | pioyan-chat の機能を TDD サイクルで実装。Next.js / FastAPI 両対応。PLAN.md のチェックリストを追跡（本リポジトリ推奨） |
 | `@agent-builder` | ユーザーの要件に応じたカスタムエージェントを対話的に設計・生成（コード実装エージェントには TDD サイクルを組み込み） |
 | `@repo-guardian` | リポジトリのベストプラクティス準拠を監査し、不足分を PR で追加 |
 | `@code-reviewer` | PR の差分をレビューし、品質・セキュリティ観点でコメントを提案 |

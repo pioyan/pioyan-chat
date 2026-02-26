@@ -1,0 +1,2 @@
+[   69841ms] [ERROR] Access to fetch at 'http://localhost:8000/api/auth/signup' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:3000/signup:0
+[   69841ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8000/api/auth/signup:0

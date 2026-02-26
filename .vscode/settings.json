@@ -22,6 +22,14 @@
             {
                 "command": "yamllint ${file}",
                 "filePattern": "**/*.{yml,yaml}"
+            },
+            {
+                "command": "ruff check --fix ${file}",
+                "filePattern": "**/*.py"
+            },
+            {
+                "command": "npx eslint --fix ${file}",
+                "filePattern": "frontend/**/*.{ts,tsx}"
             }
         ],
         "postCommand": [

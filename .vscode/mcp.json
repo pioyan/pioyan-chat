@@ -30,6 +30,16 @@
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]
+    },
+
+    // ── Playwright MCP Server ──
+    // ブラウザ操作・E2E テストの自動化を行う MCP サーバー。
+    // Web ページのスクリーンショット取得、クリック、フォーム操作などが可能です。
+    // セットアップ: https://github.com/microsoft/playwright-mcp
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
     }
 
     // ── 追加の MCP サーバー例 ──
