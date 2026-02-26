@@ -9,6 +9,8 @@ const mockMessage = {
   id: "msg-1",
   channel_id: "ch-1",
   sender_id: "user-1",
+  sender_username: "testuser",
+  sender_avatar_url: null,
   content: "Hello, world!",
   file_url: null,
   thread_id: null,
