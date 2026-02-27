@@ -3,6 +3,7 @@
 
 import { MessageSquare, Paperclip } from "lucide-react";
 import type { Message } from "@/types";
+import MarkdownContent from "@/components/MarkdownContent";
 
 interface Props {
   message: Message;
@@ -44,9 +45,7 @@ export default function MessageItem({ message, onThreadClick }: Props) {
         </div>
 
         {/* Content */}
-        <p className="text-sm text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap wrap-break-word">
-          {message.content}
-        </p>
+        <MarkdownContent content={message.content} />
 
         {/* File attachment */}
         {message.file_url && (
