@@ -60,7 +60,7 @@ export default function ThreadPanel() {
       {/* Reply count */}
       {replies.length > 0 && (
         <div className="px-4 py-2 text-xs text-zinc-500 border-b border-zinc-200 dark:border-zinc-700">
-          {replies.length} {replies.length === 1 ? "件の返信" : "件の返信"}
+          {replies.length} 件の返信
         </div>
       )}
 
