@@ -2,6 +2,7 @@
  * Tests for MessageItem component
  */
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import MessageItem from "@/components/MessageItem";
 
@@ -49,5 +50,28 @@ describe("MessageItem", () => {
   it("does not show reply badge when reply_count is 0", () => {
     render(<MessageItem message={mockMessage} onThreadClick={vi.fn()} />);
     expect(screen.queryByText(/replies/)).not.toBeInTheDocument();
+  });
+
+  it("shows hover reply button for root messages", () => {
+    render(<MessageItem message={mockMessage} onThreadClick={vi.fn()} />);
+    expect(screen.getByLabelText("スレッドで返信")).toBeInTheDocument();
+  });
+
+  it("does not show hover reply button for thread reply messages", () => {
+    render(
+      <MessageItem
+        message={{ ...mockMessage, thread_id: "parent-1" }}
+        onThreadClick={vi.fn()}
+      />,
+    );
+    expect(screen.queryByLabelText("スレッドで返信")).not.toBeInTheDocument();
+  });
+
+  it("calls onThreadClick when hover reply button is clicked", async () => {
+    const user = userEvent.setup();
+    const handleClick = vi.fn();
+    render(<MessageItem message={mockMessage} onThreadClick={handleClick} />);
+    await user.click(screen.getByLabelText("スレッドで返信"));
+    expect(handleClick).toHaveBeenCalledWith("msg-1");
   });
 });

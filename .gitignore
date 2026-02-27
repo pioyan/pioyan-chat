@@ -29,6 +29,7 @@ backend/container_files/
 # ── Node.js / pnpm ────────────────────────────────
 node_modules/
 .pnpm-store/
+package-lock.json
 
 # ── OS / エディタ ──────────────────────────────────
 .DS_Store

@@ -22,6 +22,7 @@ interface ChatState {
   setCurrentChannel: (id: string | null) => void;
   setMessages: (channelId: string, messages: Message[]) => void;
   addMessage: (message: Message) => void;
+  incrementReplyCount: (channelId: string, messageId: string) => void;
   setCurrentUser: (user: User | null) => void;
   toggleSidebar: () => void;
   setThreadMessageId: (id: string | null) => void;
@@ -55,6 +56,18 @@ export const useChatStore = create<ChatState>((set) => ({
         messages: {
           ...state.messages,
           [message.channel_id]: [...existing, message],
+        },
+      };
+    }),
+  incrementReplyCount: (channelId, messageId) =>
+    set((state) => {
+      const existing = state.messages[channelId] ?? [];
+      return {
+        messages: {
+          ...state.messages,
+          [channelId]: existing.map((m) =>
+            m.id === messageId ? { ...m, reply_count: m.reply_count + 1 } : m,
+          ),
         },
       };
     }),

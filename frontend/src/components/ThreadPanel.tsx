@@ -2,7 +2,7 @@
 /** Thread (reply) panel shown on the right side. */
 
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { messagesApi } from "@/lib/api";
 import { useChatStore } from "@/stores/chatStore";
 import type { Message } from "@/types";
@@ -10,17 +10,21 @@ import MessageInput from "./MessageInput";
 import MessageItem from "./MessageItem";
 
 export default function ThreadPanel() {
-  const { threadMessageId, setThreadMessageId, messages } = useChatStore();
+  const { threadMessageId, setThreadMessageId, messages, incrementReplyCount } =
+    useChatStore();
   const [replies, setReplies] = useState<Message[]>([]);
 
-  useEffect(() => {
+  const fetchReplies = useCallback(() => {
     if (!threadMessageId) return;
-    // スレッド返信を取得
     messagesApi
       .getThread(threadMessageId)
       .then(setReplies)
       .catch(console.error);
   }, [threadMessageId]);
+
+  useEffect(() => {
+    fetchReplies();
+  }, [fetchReplies]);
 
   // 親メッセージをストアから計算
   const allMessages = Object.values(messages).flat();
@@ -53,6 +57,13 @@ export default function ThreadPanel() {
         </div>
       )}
 
+      {/* Reply count */}
+      {replies.length > 0 && (
+        <div className="px-4 py-2 text-xs text-zinc-500 border-b border-zinc-200 dark:border-zinc-700">
+          {replies.length} 件の返信
+        </div>
+      )}
+
       {/* Replies */}
       <div className="flex-1 overflow-y-auto py-2">
         {replies.map((r) => (
@@ -64,13 +75,12 @@ export default function ThreadPanel() {
       {threadMessageId && (
         <MessageInput
           channelId={parent?.channel_id ?? ""}
+          threadId={threadMessageId}
           placeholder="スレッドに返信..."
           onSent={() => {
-            if (threadMessageId) {
-              messagesApi
-                .getThread(threadMessageId)
-                .then(setReplies)
-                .catch(console.error);
+            fetchReplies();
+            if (parent) {
+              incrementReplyCount(parent.channel_id, threadMessageId);
             }
           }}
         />

@@ -8,12 +8,14 @@ import { useChatStore } from "@/stores/chatStore";
 
 interface Props {
   channelId: string;
+  threadId?: string;
   placeholder?: string;
   onSent?: () => void;
 }
 
 export default function MessageInput({
   channelId,
+  threadId,
   placeholder,
   onSent,
 }: Props) {
@@ -27,8 +29,12 @@ export default function MessageInput({
     if (!trimmed || sending) return;
     setSending(true);
     try {
-      const msg = await messagesApi.post(channelId, { content: trimmed });
-      addMessage(msg);
+      if (threadId) {
+        await messagesApi.postThread(threadId, { content: trimmed });
+      } else {
+        const msg = await messagesApi.post(channelId, { content: trimmed });
+        addMessage(msg);
+      }
       setText("");
       onSent?.();
     } finally {
