@@ -19,7 +19,7 @@ export default function MessageItem({ message, onThreadClick }: Props) {
   const avatarLetter = displayName[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="group flex gap-3 px-4 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded">
+    <div className="group flex gap-3 px-4 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded relative">
       {/* Avatar */}
       {message.sender_avatar_url ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -61,7 +61,7 @@ export default function MessageItem({ message, onThreadClick }: Props) {
           </a>
         )}
 
-        {/* Thread button */}
+        {/* Thread button - existing replies */}
         {message.reply_count > 0 && (
           <button
             onClick={() => onThreadClick(message.id)}
@@ -73,6 +73,18 @@ export default function MessageItem({ message, onThreadClick }: Props) {
           </button>
         )}
       </div>
+
+      {/* Hover action - reply in thread */}
+      {!message.thread_id && (
+        <button
+          onClick={() => onThreadClick(message.id)}
+          className="absolute top-1 right-2 hidden group-hover:flex items-center gap-1 px-2 py-1 text-xs text-zinc-500 hover:text-violet-600 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded shadow-sm"
+          aria-label="スレッドで返信"
+        >
+          <MessageSquare size={12} />
+          <span>返信</span>
+        </button>
+      )}
     </div>
   );
 }

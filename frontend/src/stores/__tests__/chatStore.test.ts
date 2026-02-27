@@ -75,4 +75,27 @@ describe("chatStore", () => {
     useChatStore.getState().setThreadMessageId("msg-42");
     expect(useChatStore.getState().threadMessageId).toBe("msg-42");
   });
+
+  it("increments reply count for a message", async () => {
+    const { useChatStore } = await import("@/stores/chatStore");
+    const { setMessages, incrementReplyCount } = useChatStore.getState();
+    setMessages("ch-1", [
+      {
+        id: "msg-1",
+        channel_id: "ch-1",
+        sender_id: "user-1",
+        sender_username: "testuser",
+        sender_avatar_url: null,
+        content: "Hello!",
+        file_url: null,
+        thread_id: null,
+        reply_count: 0,
+        created_at: new Date().toISOString(),
+        updated_at: null,
+      },
+    ]);
+    incrementReplyCount("ch-1", "msg-1");
+    const msgs = useChatStore.getState().messages["ch-1"];
+    expect(msgs[0].reply_count).toBe(1);
+  });
 });
