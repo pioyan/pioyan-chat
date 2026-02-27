@@ -128,6 +128,7 @@ PR を作成すると以下の衛生チェックが自動実行されます:
 | `@docs-writer` | コード変更に伴うドキュメント更新提案を生成 |
 | `@dev-env-builder` | ユーザーの要件に応じた開発環境（Dev Container・CI・Dependabot 等）を対話的に構築 |
 | `@git-operator` | Git 運用に精通した専門エージェント。ブランチ・コミット・rebase・PR・Issue・hotfix/release を規約に沿って実行 |
+| `@ui-ux-designer` | ソフトグローグラデーションを基調とした UI デザインと UX 改善を担当。コンポーネントのスタイルレビュー・改善提案・実装 |
 
 ## Agent Skills
 
