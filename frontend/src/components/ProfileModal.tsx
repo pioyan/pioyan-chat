@@ -1,8 +1,8 @@
 "use client";
 /** モーダル: ユーザープロフィールを編集する */
 
-import { useState } from "react";
-import { X, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { X, User, Upload } from "lucide-react";
 import { authApi } from "@/lib/api";
 import type { User as UserType } from "@/types";
 
@@ -15,9 +15,27 @@ interface Props {
 export default function ProfileModal({ user, onClose, onUpdated }: Props) {
   const [username, setUsername] = useState(user.username);
   const [avatarUrl, setAvatarUrl] = useState(user.avatar_url ?? "");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // オブジェクト URL のメモリリークを防ぐ
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    };
+  }, [avatarPreview]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,16 +43,22 @@ export default function ProfileModal({ user, onClose, onUpdated }: Props) {
     setSuccess(false);
     setLoading(true);
     try {
-      const payload: { username?: string; avatar_url?: string } = {};
+      let updatedUser: UserType = user;
+
+      if (avatarFile) {
+        updatedUser = await authApi.uploadAvatar(avatarFile);
+        setAvatarUrl(updatedUser.avatar_url ?? "");
+      }
+
+      const payload: { username?: string } = {};
       if (username.trim() && username.trim() !== user.username) {
         payload.username = username.trim();
       }
-      const trimmedAvatarUrl = avatarUrl.trim();
-      if (trimmedAvatarUrl !== (user.avatar_url ?? "")) {
-        payload.avatar_url = trimmedAvatarUrl || "";
+      if (Object.keys(payload).length > 0) {
+        updatedUser = await authApi.updateMe(payload);
       }
-      const updated = await authApi.updateMe(payload);
-      onUpdated(updated);
+
+      onUpdated(updatedUser);
       setSuccess(true);
       setTimeout(onClose, 800);
     } catch (err: unknown) {
@@ -46,6 +70,7 @@ export default function ProfileModal({ user, onClose, onUpdated }: Props) {
 
   const displayName = user.username || user.email;
   const avatarLetter = displayName[0]?.toUpperCase() ?? "?";
+  const previewSrc = avatarPreview ?? (avatarUrl || null);
 
   return (
     <div
@@ -67,25 +92,52 @@ export default function ProfileModal({ user, onClose, onUpdated }: Props) {
 
         {/* アバタープレビュー */}
         <div className="flex items-center gap-4 mb-6">
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarUrl}
-              alt="アバター"
-              className="w-16 h-16 rounded-full object-cover border-2 border-zinc-200 dark:border-zinc-700"
-              onError={() => setAvatarUrl("")}
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-violet-600 flex items-center justify-center text-white text-2xl font-bold">
-              {avatarLetter}
-            </div>
-          )}
+          <div className="relative">
+            {previewSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={previewSrc}
+                alt="アバター"
+                className="w-16 h-16 rounded-full object-cover border-2 border-zinc-200 dark:border-zinc-700"
+                onError={() => {
+                  setAvatarUrl("");
+                  setAvatarPreview(null);
+                }}
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-violet-600 flex items-center justify-center text-white text-2xl font-bold">
+                {avatarLetter}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-0 right-0 bg-violet-600 text-white rounded-full p-1 hover:bg-violet-700"
+              title="画像をアップロード"
+            >
+              <Upload size={12} />
+            </button>
+          </div>
           <div>
             <p className="font-medium text-zinc-900 dark:text-zinc-100">
               {displayName}
             </p>
             <p className="text-xs text-zinc-400">{user.email}</p>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs text-violet-500 hover:text-violet-700 mt-1"
+            >
+              画像を変更
+            </button>
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -106,19 +158,6 @@ export default function ProfileModal({ user, onClose, onUpdated }: Props) {
             <p className="text-xs text-zinc-400 mt-1">
               未設定の場合はメールアドレスが表示名になります
             </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              プロフィール画像 URL（任意）
-            </label>
-            <input
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://example.com/avatar.png"
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-violet-500"
-            />
           </div>
 
           {error && <p className="text-xs text-red-500">{error}</p>}

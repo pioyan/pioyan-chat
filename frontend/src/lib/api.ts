@@ -55,6 +55,22 @@ export const authApi = {
       method: "PUT",
       body: JSON.stringify(data),
     }),
+
+  uploadAvatar: async (file: File) => {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${BASE_URL}/api/auth/me/avatar`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new ApiError(res.status, body.detail ?? res.statusText);
+    }
+    return res.json() as Promise<User>;
+  },
 };
 
 // ── Channels ──────────────────────────────────────────────────

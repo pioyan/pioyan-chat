@@ -1,13 +1,19 @@
 """Auth router: signup / login / me."""
 
+import contextlib
+import io
+import os
+import uuid
 from datetime import UTC, datetime
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from PIL import Image
 from pydantic import BaseModel, EmailStr
 
 from app.auth.dependencies import get_current_user
 from app.auth.utils import create_access_token, hash_password, verify_password
+from app.config import settings
 from app.database import get_db
 from app.models.user import UserCreate, UserPublic, UserUpdate
 
@@ -101,6 +107,68 @@ async def update_me(
             {"_id": ObjectId(current_user.id)},
             {"$set": update_data},
         )
+    doc = await db["users"].find_one({"_id": ObjectId(current_user.id)})
+    if doc is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return _doc_to_user(doc)
+
+
+_AVATAR_SIZE = (256, 256)
+_ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+
+
+@router.post("/me/avatar", response_model=UserPublic)
+async def upload_avatar(
+    file: UploadFile,
+    current_user: UserPublic = Depends(get_current_user),
+) -> UserPublic:
+    """Upload a profile image, resize it to 256×256, and save it locally."""
+    if file.content_type not in _ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=415,
+            detail="Unsupported image type. Use JPEG, PNG, GIF, or WebP.",
+        )
+
+    content = await file.read()
+
+    try:
+        img = Image.open(io.BytesIO(content))
+    except (Image.UnidentifiedImageError, OSError) as exc:
+        raise HTTPException(status_code=400, detail="Invalid image file.") from exc
+
+    # thumbnail() はアスペクト比を保ちながら in-place でリサイズする
+    img.thumbnail(_AVATAR_SIZE)
+
+    # RGBA → RGB 変換（JPEG は透過をサポートしない）
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
+
+    output = io.BytesIO()
+    img.save(output, format="JPEG", quality=85)
+    resized_bytes = output.getvalue()
+
+    stored_name = f"avatar_{uuid.uuid4().hex}.jpg"
+    os.makedirs(settings.upload_dir, exist_ok=True)
+    save_path = os.path.join(settings.upload_dir, stored_name)
+    with open(save_path, "wb") as f:
+        f.write(resized_bytes)
+
+    avatar_url = f"/uploads/{stored_name}"
+    db = get_db()
+
+    # 古いアバターファイルを削除する
+    old_doc = await db["users"].find_one({"_id": ObjectId(current_user.id)}, {"avatar_url": 1})
+    if old_doc and isinstance(old_doc.get("avatar_url"), str):
+        old_name = old_doc["avatar_url"].removeprefix("/uploads/")
+        if old_name.startswith("avatar_"):
+            old_path = os.path.join(settings.upload_dir, old_name)
+            with contextlib.suppress(OSError):
+                os.remove(old_path)
+
+    await db["users"].update_one(
+        {"_id": ObjectId(current_user.id)},
+        {"$set": {"avatar_url": avatar_url}},
+    )
     doc = await db["users"].find_one({"_id": ObjectId(current_user.id)})
     if doc is None:
         raise HTTPException(status_code=404, detail="User not found")
