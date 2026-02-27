@@ -37,3 +37,18 @@ export interface AuthTokenResponse {
   access_token: string;
   token_type: string;
 }
+
+export interface Bot {
+  id: string;
+  name: string;
+  description: string | null;
+  owner_id: string;
+  container_file_name: string;
+  status: "registered" | "building" | "ready" | "error";
+  created_at: string;
+}
+
+export interface BotValidateResponse {
+  valid: boolean;
+  errors: string[];
+}

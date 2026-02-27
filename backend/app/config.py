@@ -27,5 +27,9 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     max_file_size_mb: int = 10
 
+    # Bot container files
+    container_files_dir: str = "container_files"
+    max_container_file_size_kb: int = 256
+
 
 settings = Settings()

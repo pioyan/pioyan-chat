@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import close_connection, get_db
-from app.routers import auth, channels, dm, files
+from app.routers import auth, bots, channels, dm, files
 from app.routers.messages import channel_messages_router
 from app.routers.messages import router as messages_router
 from app.sockets import register_handlers
@@ -23,6 +23,7 @@ async def lifespan(app: FastAPI):
     await db["messages"].create_index([("content", "text")])
     await db["messages"].create_index("channel_id")
     await db["channels"].create_index("name")
+    await db["bots"].create_index("owner_id")
     yield
     # Shutdown: close DB connection
     await close_connection()
@@ -56,6 +57,7 @@ app.include_router(channel_messages_router, prefix="/api", tags=["messages"])
 app.include_router(messages_router, prefix="/api/messages", tags=["messages"])
 app.include_router(dm.router, prefix="/api/dm", tags=["dm"])
 app.include_router(files.router, prefix="/api/files", tags=["files"])
+app.include_router(bots.router, prefix="/api/bots", tags=["bots"])
 
 
 @app.get("/health")
