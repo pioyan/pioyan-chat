@@ -92,6 +92,11 @@ body {
   color: #7c3aed;
   text-decoration: underline;
 }
+@media (prefers-color-scheme: dark) {
+  .markdown-content a {
+    color: #a78bfa;
+  }
+}
 .markdown-content table {
   border-collapse: collapse;
   margin: 0.5em 0;
