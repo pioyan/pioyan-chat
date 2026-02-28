@@ -82,6 +82,9 @@ pioyan-chat/
 │   └── pyproject.toml
 ├── docker-compose.yml           # MongoDB 7 + mongo-express
 ├── docs/                        # システムドキュメント（本ディレクトリ）
+│   ├── guides/                  #   開発・利用ガイド
+│   ├── reference/               #   技術リファレンス
+│   └── reports/                 #   検証・ステータスレポート
 ├── PLAN.md                      # 構築計画・チェックリスト
 └── README.md                    # プロジェクト README
 ```
