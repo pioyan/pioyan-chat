@@ -31,5 +31,12 @@ class Settings(BaseSettings):
     container_files_dir: str = "container_files"
     max_container_file_size_kb: int = 256
 
+    # GitHub integration
+    github_token: str = ""
+
+    # Agent container images
+    agent_base_image: str = "pioyan-chat-agent-base:latest"
+    agent_network: str = "pioyan-chat-agents"
+
 
 settings = Settings()

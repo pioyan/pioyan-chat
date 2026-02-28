@@ -1,6 +1,7 @@
 """Messages router: CRUD + pagination + search + thread."""
 
 import contextlib
+import logging
 from datetime import UTC, datetime
 
 from bson import ObjectId
@@ -9,8 +10,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.auth.dependencies import get_current_user
 from app.database import get_db
+from app.models.coding_task import TaskStatus
 from app.models.message import MessageCreate, MessagePublic
 from app.models.user import UserPublic
+from app.services.orchestrator import Orchestrator
+
+logger = logging.getLogger(__name__)
 
 # /api/channels/{channel_id}/messages に対応するルーター
 channel_messages_router = APIRouter()
@@ -105,7 +110,11 @@ async def post_message(
     body: MessageCreate,
     current_user: UserPublic = Depends(get_current_user),
 ) -> MessagePublic:
-    """Post a new message to a channel."""
+    """Post a new message to a channel.
+
+    If the channel is a coding channel, automatically creates a coding task
+    and routes the instruction to the appropriate agent.
+    """
     db = get_db()
     now = datetime.now(UTC)
     doc = {
@@ -123,7 +132,61 @@ async def post_message(
     users = {
         current_user.id: {"username": current_user.username, "avatar_url": current_user.avatar_url}
     }
-    return _doc_to_message(doc, users)
+    message = _doc_to_message(doc, users)
+
+    # ── Coding channel auto-task creation ──
+    await _maybe_create_coding_task(db, channel_id, body.content, current_user, now)
+
+    return message
+
+
+async def _maybe_create_coding_task(
+    db, channel_id: str, content: str, user: UserPublic, now
+) -> None:
+    """If channel is a coding channel, create a task from the message."""
+    try:
+        ch_oid = ObjectId(channel_id)
+    except Exception:
+        return
+
+    channel = await db["channels"].find_one({"_id": ch_oid})
+    if channel is None or not channel.get("is_coding"):
+        return
+
+    agent_ids = channel.get("assigned_agents", [])
+    available_agents: dict[str, str] = {}
+    if agent_ids:
+        cursor = db["agents"].find({"_id": {"$in": agent_ids}})
+        async for agent_doc in cursor:
+            available_agents[str(agent_doc["_id"])] = agent_doc["name"]
+
+    if not available_agents:
+        logger.warning("Coding channel %s has no agents assigned", channel_id)
+        return
+
+    routing = await Orchestrator.route_instruction(content, available_agents)
+    if not routing["target_agent_ids"]:
+        return
+
+    task_doc = {
+        "channel_id": ch_oid,
+        "agent_id": ObjectId(routing["target_agent_ids"][0]),
+        "user_id": ObjectId(user.id),
+        "instruction": routing["instruction"],
+        "status": TaskStatus.pending,
+        "result_summary": None,
+        "commit_sha": None,
+        "pr_url": None,
+        "branch_name": None,
+        "created_at": now,
+        "completed_at": None,
+    }
+    await db["coding_tasks"].insert_one(task_doc)
+    logger.info(
+        "Auto-created coding task in channel %s for agent %s",
+        channel_id,
+        routing["target_agent_ids"][0],
+    )
 
 
 @router.delete("/{message_id}", status_code=204)

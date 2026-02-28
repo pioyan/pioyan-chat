@@ -78,3 +78,31 @@ def register_handlers(sio) -> None:
                 room=channel_id,
                 skip_sid=sid,
             )
+
+    # ── Agent / Coding Task events ──────────────────────────────
+
+    @sio.event
+    async def agent_typing(sid: str, data: dict) -> None:
+        """Broadcast agent typing indicator to a coding channel."""
+        channel_id = data.get("channel_id")
+        if channel_id:
+            await sio.emit("agent_typing", data, room=channel_id)
+
+
+async def emit_agent_response(channel_id: str, data: dict) -> None:
+    """Emit an agent response to all clients in a coding channel.
+
+    Called from the coding tasks execution pipeline when an agent
+    produces output.
+    """
+    if _sio is not None:
+        await _sio.emit("agent_response", data, room=channel_id)
+
+
+async def emit_task_status(channel_id: str, data: dict) -> None:
+    """Emit a task status update to all clients in a coding channel.
+
+    Called when a coding task changes status (running, completed, failed).
+    """
+    if _sio is not None:
+        await _sio.emit("task_status", data, room=channel_id)
