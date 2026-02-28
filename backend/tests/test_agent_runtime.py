@@ -115,7 +115,7 @@ class TestGitOps:
         ops = GitOps(repo_dir="/tmp/test-repo")
 
         with (
-            patch.object(ops, "_run", return_value="abc123\n") as mock_run,
+            patch.object(ops, "_run", return_value="abc123\n"),
             patch("subprocess.run") as mock_subprocess,
         ):
             # Simulate there are staged changes (exit code 1 = there are diffs)
@@ -131,7 +131,7 @@ class TestGitOps:
         ops = GitOps(repo_dir="/tmp/test-repo")
 
         with (
-            patch.object(ops, "_run") as mock_run,
+            patch.object(ops, "_run"),
             patch("subprocess.run") as mock_subprocess,
         ):
             # Simulate no staged changes (exit code 0 = no diffs)

@@ -10,7 +10,6 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
-import pytest
 from bson import ObjectId
 from httpx import AsyncClient
 
