@@ -42,17 +42,17 @@ export default function CreateChannelModal({ onClose, onCreated }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-md p-6">
+      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-white/50 dark:border-violet-500/20 shadow-2xl glow-surface w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
             チャンネルを作成
           </h2>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+            className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
           >
             <X size={18} />
           </button>
@@ -60,7 +60,7 @@ export default function CreateChannelModal({ onClose, onCreated }: Props) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               チャンネル名 <span className="text-red-500">*</span>
             </label>
             <input
@@ -70,12 +70,12 @@ export default function CreateChannelModal({ onClose, onCreated }: Props) {
               placeholder="例: プロジェクト全体"
               required
               maxLength={80}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/70 dark:border-gray-700/50 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none focus:border-violet-400/60 dark:focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               説明（任意）
             </label>
             <input
@@ -84,7 +84,7 @@ export default function CreateChannelModal({ onClose, onCreated }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="このチャンネルの目的"
               maxLength={256}
-              className="w-full border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/70 dark:border-gray-700/50 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none focus:border-violet-400/60 dark:focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
             />
           </div>
 
@@ -93,9 +93,9 @@ export default function CreateChannelModal({ onClose, onCreated }: Props) {
               type="checkbox"
               checked={isPrivate}
               onChange={(e) => setIsPrivate(e.target.checked)}
-              className="rounded border-zinc-300 dark:border-zinc-600 text-violet-600 focus:ring-violet-500"
+              className="rounded border-gray-300 dark:border-gray-600 text-violet-600 focus:ring-violet-500/30"
             />
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
+            <span className="text-sm text-gray-700 dark:text-gray-300">
               プライベートチャンネルにする
             </span>
           </label>
@@ -106,14 +106,14 @@ export default function CreateChannelModal({ onClose, onCreated }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+              className="px-4 py-2 text-sm rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 transition-colors"
             >
               キャンセル
             </button>
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="px-4 py-2 text-sm rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-medium shadow-lg glow-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               {loading ? "作成中…" : "作成"}
             </button>

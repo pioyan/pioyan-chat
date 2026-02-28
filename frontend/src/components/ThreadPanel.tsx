@@ -35,15 +35,15 @@ export default function ThreadPanel() {
   if (!threadMessageId) return null;
 
   return (
-    <aside className="w-80 border-l border-zinc-200 dark:border-zinc-700 flex flex-col h-full bg-white dark:bg-zinc-900">
+    <aside className="w-80 border-l border-gray-200/50 dark:border-violet-500/10 flex flex-col h-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-700">
-        <h2 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/30">
+        <h2 className="font-semibold text-sm bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
           スレッド
         </h2>
         <button
           onClick={() => setThreadMessageId(null)}
-          className="text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+          className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
           aria-label="閉じる"
         >
           <X size={16} />
@@ -52,14 +52,14 @@ export default function ThreadPanel() {
 
       {/* Parent message */}
       {parent && (
-        <div className="border-b border-zinc-200 dark:border-zinc-700 py-2">
+        <div className="border-b border-gray-200/50 dark:border-gray-700/30 py-2">
           <MessageItem message={parent} onThreadClick={() => {}} />
         </div>
       )}
 
       {/* Reply count */}
       {replies.length > 0 && (
-        <div className="px-4 py-2 text-xs text-zinc-500 border-b border-zinc-200 dark:border-zinc-700">
+        <div className="px-4 py-2 text-xs text-violet-500 border-b border-gray-200/50 dark:border-gray-700/30">
           {replies.length} 件の返信
         </div>
       )}

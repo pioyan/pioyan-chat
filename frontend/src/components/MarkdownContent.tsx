@@ -10,7 +10,7 @@ interface Props {
 
 export default function MarkdownContent({ content }: Props) {
   return (
-    <div className="markdown-content text-sm text-zinc-800 dark:text-zinc-200 break-words">
+    <div className="markdown-content text-sm text-gray-800 dark:text-gray-200 break-words">
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );

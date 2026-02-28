@@ -38,10 +38,10 @@ export default function Sidebar({
   const privateChannels = channels.filter((c) => c.is_private && !c.is_direct);
 
   const itemClass = (id: string) =>
-    `flex items-center gap-2 px-3 py-1 rounded cursor-pointer text-sm transition-colors ${
+    `flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer text-sm transition-all duration-150 ${
       currentChannelId === id
-        ? "bg-violet-600 text-white"
-        : "text-zinc-300 hover:bg-zinc-700 hover:text-white"
+        ? "bg-gradient-to-r from-violet-600/80 to-fuchsia-600/60 text-white shadow-md"
+        : "text-gray-400 hover:bg-white/8 hover:text-gray-100"
     }`;
 
   const displayName = currentUser
@@ -51,16 +51,21 @@ export default function Sidebar({
 
   return (
     <>
-      <aside className="w-60 bg-zinc-900 flex flex-col h-full">
+      <aside className="w-60 flex flex-col h-full bg-gray-950/95 backdrop-blur-sm border-r border-violet-500/10">
         {/* Workspace header */}
-        <div className="px-4 py-3 border-b border-zinc-700">
-          <h1 className="font-bold text-white text-lg">pioyan-chat</h1>
+        <div className="px-4 py-3.5 border-b border-white/5">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shrink-0">
+              <MessageCircle size={14} className="text-white" />
+            </div>
+            <h1 className="font-bold text-white text-base tracking-tight">pioyan-chat</h1>
+          </div>
         </div>
 
         {/* Search button */}
         <button
           onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2 mx-3 my-2 px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-zinc-300 text-sm"
+          className="flex items-center gap-2 mx-3 my-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 hover:border-white/15 rounded-lg text-gray-400 hover:text-gray-200 text-sm transition-all duration-150"
         >
           <Search size={14} />
           <span>検索</span>
@@ -70,11 +75,11 @@ export default function Sidebar({
         <div className="flex-1 overflow-y-auto">
           <div className="px-3 pt-3 pb-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest select-none">
                 チャンネル
               </span>
               <button
-                className="text-zinc-400 hover:text-white"
+                className="text-gray-500 hover:text-white transition-colors"
                 aria-label="チャンネル追加"
                 onClick={() => setCreateChannelOpen(true)}
               >
@@ -97,7 +102,7 @@ export default function Sidebar({
           {privateChannels.length > 0 && (
             <>
               <div className="px-3 pt-3 pb-1">
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
                   プライベート
                 </span>
               </div>
@@ -118,7 +123,7 @@ export default function Sidebar({
           {dms.length > 0 && (
             <>
               <div className="px-3 pt-3 pb-1">
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
                   ダイレクトメッセージ
                 </span>
               </div>
@@ -137,7 +142,7 @@ export default function Sidebar({
         </div>
 
         {/* User info footer */}
-        <div className="border-t border-zinc-700 px-3 py-2 flex items-center gap-2">
+        <div className="border-t border-white/8 px-3 py-2.5 flex items-center gap-2 bg-white/3">
           {currentUser?.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -146,16 +151,16 @@ export default function Sidebar({
               className="w-8 h-8 rounded-full object-cover shrink-0"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-md">
               {avatarLetter}
             </div>
           )}
-          <span className="flex-1 text-sm text-zinc-300 truncate">
+          <span className="flex-1 text-sm text-gray-300 truncate">
             {displayName}
           </span>
           <button
             onClick={onProfileClick}
-            className="text-zinc-400 hover:text-white shrink-0"
+            className="text-gray-400 hover:text-violet-300 shrink-0 transition-colors"
             aria-label="プロフィール設定"
           >
             <Settings size={14} />
