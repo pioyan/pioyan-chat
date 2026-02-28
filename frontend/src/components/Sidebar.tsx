@@ -6,13 +6,13 @@ import {
   Lock,
   MessageCircle,
   Plus,
-  Search,
   Settings,
 } from "lucide-react";
 import { useState } from "react";
 import type { Channel, User } from "@/types";
 import { useChatStore } from "@/stores/chatStore";
 import CreateChannelModal from "./CreateChannelModal";
+import type { NavSection } from "./AppNavBar";
 
 interface Props {
   channels: Channel[];
@@ -21,6 +21,8 @@ interface Props {
   currentUser: User | null;
   onChannelCreated: (channel: Channel) => void;
   onProfileClick: () => void;
+  /** AppNavBar から渡されるアクティブセクション */
+  activeSection: NavSection;
 }
 
 export default function Sidebar({
@@ -30,8 +32,9 @@ export default function Sidebar({
   currentUser,
   onChannelCreated,
   onProfileClick,
+  activeSection,
 }: Props) {
-  const { setCurrentChannel, setSearchOpen } = useChatStore();
+  const { setCurrentChannel } = useChatStore();
   const [createChannelOpen, setCreateChannelOpen] = useState(false);
 
   const publicChannels = channels.filter((c) => !c.is_private && !c.is_direct);
@@ -52,93 +55,88 @@ export default function Sidebar({
   return (
     <>
       <aside className="w-60 flex flex-col h-full bg-gray-950/95 backdrop-blur-sm border-r border-violet-500/10">
-        {/* Workspace header */}
-        <div className="px-4 py-3.5 border-b border-white/5">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shrink-0">
-              <MessageCircle size={14} className="text-white" />
-            </div>
-            <h1 className="font-bold text-white text-base tracking-tight">
-              pioyan-chat
-            </h1>
-          </div>
+        {/* セクションヘッダー */}
+        <div className="px-4 py-3 border-b border-white/5">
+          <h2 className="font-semibold text-sm text-gray-200 tracking-tight">
+            {activeSection === "channels" ? "チャンネル" : "ダイレクトメッセージ"}
+          </h2>
         </div>
 
-        {/* Search button */}
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2 mx-3 my-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/8 hover:border-white/15 rounded-lg text-gray-400 hover:text-gray-200 text-sm transition-all duration-150"
-        >
-          <Search size={14} />
-          <span>検索</span>
-        </button>
-
-        {/* Channel list */}
+        {/* リスト */}
         <div className="flex-1 overflow-y-auto">
-          <div className="px-3 pt-3 pb-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest select-none">
-                チャンネル
-              </span>
-              <button
-                className="text-gray-500 hover:text-white transition-colors"
-                aria-label="チャンネル追加"
-                onClick={() => setCreateChannelOpen(true)}
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          </div>
-          {publicChannels.map((ch) => (
-            <div
-              key={ch.id}
-              className={itemClass(ch.id)}
-              onClick={() => setCurrentChannel(ch.id)}
-            >
-              <Hash size={14} />
-              <span className="truncate">{ch.name}</span>
-            </div>
-          ))}
-
-          {/* Private channels */}
-          {privateChannels.length > 0 && (
+          {activeSection === "channels" ? (
             <>
+              {/* パブリックチャンネル */}
               <div className="px-3 pt-3 pb-1">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-                  プライベート
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest select-none">
+                    パブリック
+                  </span>
+                  <button
+                    className="text-gray-500 hover:text-white transition-colors"
+                    aria-label="チャンネル追加"
+                    onClick={() => setCreateChannelOpen(true)}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
               </div>
-              {privateChannels.map((ch) => (
+              {publicChannels.map((ch) => (
                 <div
                   key={ch.id}
                   className={itemClass(ch.id)}
                   onClick={() => setCurrentChannel(ch.id)}
                 >
-                  <Lock size={14} />
+                  <Hash size={14} />
                   <span className="truncate">{ch.name}</span>
                 </div>
               ))}
-            </>
-          )}
 
-          {/* DMs */}
-          {dms.length > 0 && (
+              {/* プライベートチャンネル */}
+              {privateChannels.length > 0 && (
+                <>
+                  <div className="px-3 pt-3 pb-1">
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+                      プライベート
+                    </span>
+                  </div>
+                  {privateChannels.map((ch) => (
+                    <div
+                      key={ch.id}
+                      className={itemClass(ch.id)}
+                      onClick={() => setCurrentChannel(ch.id)}
+                    >
+                      <Lock size={14} />
+                      <span className="truncate">{ch.name}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+            </>
+          ) : (
             <>
-              <div className="px-3 pt-3 pb-1">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-                  ダイレクトメッセージ
-                </span>
-              </div>
-              {dms.map((dm) => (
-                <div
-                  key={dm.id}
-                  className={itemClass(dm.id)}
-                  onClick={() => setCurrentChannel(dm.id)}
-                >
-                  <MessageCircle size={14} />
-                  <span className="truncate">{dm.name}</span>
+              {/* DM リスト */}
+              {dms.length === 0 ? (
+                <div className="px-4 py-6 text-center">
+                  <MessageCircle size={32} className="mx-auto text-gray-600 mb-2" />
+                  <p className="text-xs text-gray-500">
+                    まだ DM はありません
+                  </p>
                 </div>
-              ))}
+              ) : (
+                dms.map((dm) => (
+                  <div
+                    key={dm.id}
+                    className={itemClass(dm.id)}
+                    onClick={() => setCurrentChannel(dm.id)}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-400 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      {dm.name?.[0]?.toUpperCase() ?? "?"}
+                    </div>
+                    <span className="truncate">{dm.name}</span>
+                  </div>
+                ))
+              )}
             </>
           )}
         </div>

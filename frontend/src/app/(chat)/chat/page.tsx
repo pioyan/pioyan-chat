@@ -1,7 +1,7 @@
 "use client";
 /** Main chat page — Slack-style 3-column layout. */
 
-import { Hash } from "lucide-react";
+import { Hash, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi, channelsApi, dmApi, messagesApi } from "@/lib/api";
@@ -15,6 +15,8 @@ import ProfileModal from "@/components/ProfileModal";
 import SearchModal from "@/components/SearchModal";
 import Sidebar from "@/components/Sidebar";
 import ThreadPanel from "@/components/ThreadPanel";
+import AppNavBar from "@/components/AppNavBar";
+import type { NavSection } from "@/components/AppNavBar";
 
 export default function ChatPage() {
   const router = useRouter();
@@ -35,6 +37,7 @@ export default function ChatPage() {
     useChatStore.getState().channels.filter((c) => c.is_direct),
   );
   const [profileOpen, setProfileOpen] = useState(false);
+  const [navSection, setNavSection] = useState<NavSection>("channels");
 
   // Socket.IO 接続
   useSocket();
@@ -86,6 +89,20 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-white via-violet-50/20 to-white dark:from-gray-950 dark:via-violet-950/10 dark:to-gray-950 overflow-hidden">
+      {/* App nav bar (icon strip) */}
+      <AppNavBar
+        activeSection={navSection}
+        onSectionChange={(section) => {
+          setNavSection(section);
+          // DM セクションに切り替えたとき、1番目の DM を自動選択
+          if (section === "dms" && dms.length > 0 && !dms.find(d => d.id === currentChannelId)) {
+            setCurrentChannel(dms[0].id);
+          }
+        }}
+        onSearchClick={() => useChatStore.getState().setSearchOpen(true)}
+        onSettingsClick={() => setProfileOpen(true)}
+      />
+
       {/* Left sidebar */}
       <Sidebar
         channels={channels.filter((c) => !c.is_direct)}
@@ -94,13 +111,18 @@ export default function ChatPage() {
         currentUser={currentUser}
         onChannelCreated={handleChannelCreated}
         onProfileClick={() => setProfileOpen(true)}
+        activeSection={navSection}
       />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Channel header */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-          <Hash size={16} className="text-violet-400" />
+          {currentChannel?.is_direct ? (
+            <MessageCircle size={16} className="text-fuchsia-400" />
+          ) : (
+            <Hash size={16} className="text-violet-400" />
+          )}
           <h2 className="font-semibold text-sm text-gray-900 dark:text-gray-100 tracking-tight">
             {currentChannel?.name ?? "チャンネルを選択"}
           </h2>
