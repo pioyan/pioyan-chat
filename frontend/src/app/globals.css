@@ -97,22 +97,63 @@ body {
   list-style-type: decimal;
 }
 .markdown-content code {
-  background-color: rgba(127, 127, 127, 0.15);
-  padding: 0.125em 0.25em;
-  border-radius: 0.25em;
+  background-color: rgba(100, 80, 160, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  color: #7c3aed;
+  padding: 0.1em 0.35em;
+  border-radius: 0.3em;
   font-size: 0.875em;
+  font-family: var(--font-geist-mono), "Cascadia Code", "Fira Code", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  .markdown-content code {
+    background-color: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #c4b5fd;
+  }
 }
 .markdown-content pre {
-  background-color: rgba(127, 127, 127, 0.1);
-  padding: 0.5em 0.75em;
-  border-radius: 0.375em;
+  background-color: #f4f1ff;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-left: 3px solid #7c3aed;
+  padding: 0.75em 1em;
+  border-radius: 0.5em;
   overflow-x: auto;
   margin: 0.5em 0;
+  position: relative;
+}
+@media (prefers-color-scheme: dark) {
+  .markdown-content pre {
+    background-color: #0d0b14;
+    border-color: rgba(139, 92, 246, 0.25);
+    border-left-color: #7c3aed;
+  }
 }
 .markdown-content pre code {
   background: none;
+  border: none;
+  color: #1e1b4b;
   padding: 0;
   font-size: 0.8125em;
+}
+@media (prefers-color-scheme: dark) {
+  .markdown-content pre code {
+    color: #e0d7ff;
+  }
+}
+/* 自分のメッセージ（グラディエントバブル内）のコードブロック */
+.markdown-content.own-message code {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fde68a;
+}
+.markdown-content.own-message pre {
+  background-color: rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.5);
+}
+.markdown-content.own-message pre code {
+  color: #f0e6ff;
 }
 .markdown-content blockquote {
   border-left: 3px solid rgba(127, 127, 127, 0.4);

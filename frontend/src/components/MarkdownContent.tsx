@@ -6,11 +6,18 @@ import remarkGfm from "remark-gfm";
 
 interface Props {
   content: string;
+  ownMessage?: boolean;
 }
 
-export default function MarkdownContent({ content }: Props) {
+export default function MarkdownContent({ content, ownMessage }: Props) {
   return (
-    <div className="markdown-content text-sm text-gray-800 dark:text-gray-200 break-words">
+    <div
+      className={`markdown-content text-sm break-words ${
+        ownMessage
+          ? "text-white own-message"
+          : "text-gray-800 dark:text-gray-200"
+      }`}
+    >
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );

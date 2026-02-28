@@ -2,7 +2,7 @@
 /** Text + file input bar. */
 
 import { Paperclip, Send } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { filesApi, messagesApi } from "@/lib/api";
 import { useChatStore } from "@/stores/chatStore";
 
@@ -22,7 +22,16 @@ export default function MessageInput({
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const addMessage = useChatStore((s) => s.addMessage);
+
+  // テキスト変更時にtextareaの高さを自動調整（最大160px）
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
+  }, [text]);
 
   const handleSend = async () => {
     const trimmed = text.trim();
@@ -88,12 +97,14 @@ export default function MessageInput({
 
         {/* Textarea */}
         <textarea
+          ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder ?? "メッセージを入力..."}
           rows={1}
-          className="flex-1 resize-none bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none"
+          className="flex-1 resize-none bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none overflow-y-auto"
+          style={{ maxHeight: "160px" }}
           aria-label="メッセージ"
         />
 
