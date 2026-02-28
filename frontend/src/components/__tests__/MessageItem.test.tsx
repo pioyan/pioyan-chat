@@ -74,4 +74,50 @@ describe("MessageItem", () => {
     await user.click(screen.getByLabelText("スレッドで返信"));
     expect(handleClick).toHaveBeenCalledWith("msg-1");
   });
+
+  describe("own message (right-aligned)", () => {
+    it("applies flex-row-reverse class when currentUserId matches sender_id", () => {
+      const { container } = render(
+        <MessageItem
+          message={mockMessage}
+          onThreadClick={vi.fn()}
+          currentUserId="user-1"
+        />,
+      );
+      const outer = container.firstChild as HTMLElement;
+      expect(outer.className).toContain("flex-row-reverse");
+    });
+
+    it("does not apply flex-row-reverse when currentUserId differs from sender_id", () => {
+      const { container } = render(
+        <MessageItem
+          message={mockMessage}
+          onThreadClick={vi.fn()}
+          currentUserId="other-user"
+        />,
+      );
+      const outer = container.firstChild as HTMLElement;
+      expect(outer.className).not.toContain("flex-row-reverse");
+    });
+
+    it("does not apply flex-row-reverse when currentUserId is not provided", () => {
+      const { container } = render(
+        <MessageItem message={mockMessage} onThreadClick={vi.fn()} />,
+      );
+      const outer = container.firstChild as HTMLElement;
+      expect(outer.className).not.toContain("flex-row-reverse");
+    });
+
+    it("positions hover reply button on the left for own messages", () => {
+      render(
+        <MessageItem
+          message={mockMessage}
+          onThreadClick={vi.fn()}
+          currentUserId="user-1"
+        />,
+      );
+      const btn = screen.getByLabelText("スレッドで返信");
+      expect(btn.className).toContain("left-2");
+    });
+  });
 });

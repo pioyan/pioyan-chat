@@ -3,6 +3,7 @@
 
 import { useEffect, useRef } from "react";
 import type { Message } from "@/types";
+import { useChatStore } from "@/stores/chatStore";
 import MessageItem from "./MessageItem";
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 
 export default function MessageList({ messages, onThreadClick }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const currentUser = useChatStore((s) => s.currentUser);
 
   // 最新メッセージへ自動スクロール
   useEffect(() => {
@@ -29,7 +31,12 @@ export default function MessageList({ messages, onThreadClick }: Props) {
   return (
     <div className="flex-1 overflow-y-auto py-2">
       {messages.map((msg) => (
-        <MessageItem key={msg.id} message={msg} onThreadClick={onThreadClick} />
+        <MessageItem
+          key={msg.id}
+          message={msg}
+          onThreadClick={onThreadClick}
+          currentUserId={currentUser?.id}
+        />
       ))}
       <div ref={bottomRef} />
     </div>
