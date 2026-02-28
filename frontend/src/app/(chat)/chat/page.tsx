@@ -1,7 +1,7 @@
 "use client";
 /** Main chat page — Slack-style 3-column layout. */
 
-import { Hash, MessageCircle } from "lucide-react";
+import { Bot, Code2, ExternalLink, Hash, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi, channelsApi, dmApi, messagesApi } from "@/lib/api";
@@ -9,6 +9,8 @@ import { isAuthenticated } from "@/lib/auth";
 import { useSocket } from "@/hooks/useSocket";
 import { useChatStore } from "@/stores/chatStore";
 import type { Channel } from "@/types";
+import AgentPanel from "@/components/AgentPanel";
+import BotManagementPanel from "@/components/BotManagementPanel";
 import MessageInput from "@/components/MessageInput";
 import MessageList from "@/components/MessageList";
 import ProfileModal from "@/components/ProfileModal";
@@ -26,12 +28,14 @@ export default function ChatPage() {
     currentUser,
     messages,
     threadMessageId,
+    agentPanelOpen,
     setChannels,
     addChannel,
     setCurrentUser,
     setMessages,
     setCurrentChannel,
     setThreadMessageId,
+    setAgentPanelOpen,
   } = useChatStore();
   const [dms, setDms] = useState(
     useChatStore.getState().channels.filter((c) => c.is_direct),
@@ -95,7 +99,11 @@ export default function ChatPage() {
         onSectionChange={(section) => {
           setNavSection(section);
           // DM セクションに切り替えたとき、1番目の DM を自動選択
-          if (section === "dms" && dms.length > 0 && !dms.find(d => d.id === currentChannelId)) {
+          if (
+            section === "dms" &&
+            dms.length > 0 &&
+            !dms.find((d) => d.id === currentChannelId)
+          ) {
             setCurrentChannel(dms[0].id);
           }
         }}
@@ -115,42 +123,86 @@ export default function ChatPage() {
       />
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Channel header */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-          {currentChannel?.is_direct ? (
-            <MessageCircle size={16} className="text-fuchsia-400" />
-          ) : (
-            <Hash size={16} className="text-violet-400" />
-          )}
-          <h2 className="font-semibold text-sm text-gray-900 dark:text-gray-100 tracking-tight">
-            {currentChannel?.name ?? "チャンネルを選択"}
-          </h2>
-          {currentChannel?.description && (
-            <span className="text-xs text-gray-400 ml-2">
-              {currentChannel.description}
-            </span>
-          )}
-        </div>
+      {navSection === "bots" ? (
+        <BotManagementPanel />
+      ) : (
+        <>
+          <div className="flex-1 flex flex-col min-w-0">
+            {/* Channel header */}
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+              {currentChannel?.is_coding ? (
+                <Code2 size={16} className="text-cyan-400 shrink-0" />
+              ) : currentChannel?.is_direct ? (
+                <MessageCircle size={16} className="text-fuchsia-400 shrink-0" />
+              ) : (
+                <Hash size={16} className="text-violet-400 shrink-0" />
+              )}
+              <h2 className="font-semibold text-sm text-gray-900 dark:text-gray-100 tracking-tight">
+                {currentChannel?.name ?? "チャンネルを選択"}
+              </h2>
+              {currentChannel?.description && (
+                <span className="text-xs text-gray-400 ml-2 truncate">
+                  {currentChannel.description}
+                </span>
+              )}
+              {currentChannel?.is_coding && (
+                <>
+                  {currentChannel.repo_owner && currentChannel.repo_name && (
+                    <a
+                      href={`https://github.com/${currentChannel.repo_owner}/${currentChannel.repo_name}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200/60 dark:border-cyan-700/30 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 transition-colors font-mono"
+                    >
+                      <ExternalLink size={9} />
+                      {currentChannel.repo_owner}/{currentChannel.repo_name}
+                    </a>
+                  )}
+                  <div className="flex-1" />
+                  <button
+                    onClick={() => setAgentPanelOpen(!agentPanelOpen)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+                      agentPanelOpen
+                        ? "bg-gradient-to-r from-cyan-500/20 to-violet-500/20 dark:from-cyan-900/40 dark:to-violet-900/40 text-cyan-700 dark:text-cyan-300 border border-cyan-300/40 dark:border-cyan-700/40 shadow-sm"
+                        : "text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 border border-transparent hover:border-cyan-200/50 dark:hover:border-cyan-700/30"
+                    }`}
+                    title="エージェント & タスク"
+                  >
+                    <Bot size={13} />
+                    <span>エージェント</span>
+                  </button>
+                </>
+              )}
+            </div>
 
-        {/* Message area */}
-        {currentChannelId ? (
-          <>
-            <MessageList
-              messages={currentMessages}
-              onThreadClick={(id) => setThreadMessageId(id)}
-            />
-            <MessageInput channelId={currentChannelId} />
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-400">
-            <p>チャンネルを選択してください</p>
+            {/* Message area */}
+            {currentChannelId ? (
+              <>
+                <MessageList
+                  messages={currentMessages}
+                  onThreadClick={(id) => setThreadMessageId(id)}
+                />
+                <MessageInput channelId={currentChannelId} />
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-400">
+                <p>チャンネルを選択してください</p>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Thread panel */}
-      {threadMessageId && <ThreadPanel />}
+          {/* Thread panel */}
+          {threadMessageId && <ThreadPanel />}
+
+          {/* Agent panel (coding channels) */}
+          {agentPanelOpen && currentChannelId && currentChannel?.is_coding && (
+            <AgentPanel
+              channelId={currentChannelId}
+              onClose={() => setAgentPanelOpen(false)}
+            />
+          )}
+        </>
+      )}
 
       {/* Search modal */}
       <SearchModal />

@@ -14,13 +14,16 @@ vi.mock("@/lib/api", () => ({
   filesApi: {
     upload: vi.fn(),
   },
+  agentsApi: {
+    listByChannel: vi.fn().mockResolvedValue([]),
+  },
 }));
 
 // Mock store
 const mockAddMessage = vi.fn();
 vi.mock("@/stores/chatStore", () => ({
   useChatStore: (selector: (s: Record<string, unknown>) => unknown) =>
-    selector({ addMessage: mockAddMessage }),
+    selector({ addMessage: mockAddMessage, channels: [] }),
 }));
 
 import MessageInput from "@/components/MessageInput";

@@ -4,9 +4,9 @@
  * Slack の App サイドバー相当。
  */
 
-import { Hash, MessageCircle, Search, Settings } from "lucide-react";
+import { Bot, Hash, MessageCircle, Search, Settings } from "lucide-react";
 
-export type NavSection = "channels" | "dms";
+export type NavSection = "channels" | "dms" | "bots";
 
 interface Props {
   activeSection: NavSection;
@@ -90,6 +90,14 @@ export default function AppNavBar({
         label="ダイレクトメッセージ"
         active={activeSection === "dms"}
         onClick={() => onSectionChange("dms")}
+      />
+
+      {/* ボット管理 */}
+      <NavButton
+        icon={<Bot size={18} />}
+        label="ボット管理"
+        active={activeSection === "bots"}
+        onClick={() => onSectionChange("bots")}
       />
 
       {/* 検索 */}

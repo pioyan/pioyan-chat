@@ -1,6 +1,15 @@
 /** Typed API client for pioyan-chat backend. */
 
-import type { AuthTokenResponse, Bot, BotValidateResponse, Channel, Message, User } from "@/types";
+import type {
+  Agent,
+  AuthTokenResponse,
+  Bot,
+  BotValidateResponse,
+  Channel,
+  CodingTask,
+  Message,
+  User,
+} from "@/types";
 import { getToken } from "./auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -205,4 +214,65 @@ export const botsApi = {
     }
     return res.json() as Promise<BotValidateResponse>;
   },
+};
+
+// ── Agents ────────────────────────────────────────────────────
+export const agentsApi = {
+  list: () => request<Agent[]>("/api/agents"),
+  get: (id: string) => request<Agent>(`/api/agents/${id}`),
+  create: (data: {
+    name: string;
+    description?: string;
+    system_prompt?: string;
+  }) =>
+    request<Agent>("/api/agents", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request<void>(`/api/agents/${id}`, { method: "DELETE" }),
+  listByChannel: (channelId: string) =>
+    request<Agent[]>(`/api/channels/${channelId}/agents`),
+  assignToChannel: (channelId: string, agentId: string) =>
+    request<Channel>(`/api/channels/${channelId}/agents/${agentId}`, {
+      method: "POST",
+    }),
+  removeFromChannel: (channelId: string, agentId: string) =>
+    request<Channel>(`/api/channels/${channelId}/agents/${agentId}`, {
+      method: "DELETE",
+    }),
+  syncFromRepo: (channelId: string) =>
+    request<Agent[]>(`/api/channels/${channelId}/agents/sync`, {
+      method: "POST",
+    }),
+};
+
+// ── Coding Channels ──────────────────────────────────────────
+export const codingChannelsApi = {
+  create: (data: {
+    name: string;
+    description?: string;
+    repo_url: string;
+    default_branch?: string;
+  }) =>
+    request<Channel>("/api/channels/coding", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
+// ── Coding Tasks ─────────────────────────────────────────────
+export const codingTasksApi = {
+  list: (channelId: string) =>
+    request<CodingTask[]>(`/api/channels/${channelId}/tasks`),
+  get: (channelId: string, taskId: string) =>
+    request<CodingTask>(`/api/channels/${channelId}/tasks/${taskId}`),
+  create: (
+    channelId: string,
+    data: { instruction: string; agent_id?: string },
+  ) =>
+    request<CodingTask>(`/api/channels/${channelId}/tasks`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
