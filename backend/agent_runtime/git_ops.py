@@ -36,7 +36,9 @@ class GitOps:
 
         self.repo_dir.mkdir(parents=True, exist_ok=True)
         try:
-            self._run(["git", "clone", "--branch", branch, "--depth", "50", url, str(self.repo_dir)])
+            self._run(
+                ["git", "clone", "--branch", branch, "--depth", "50", url, str(self.repo_dir)]
+            )
         except subprocess.CalledProcessError as exc:
             # Sanitize token from error message
             err_msg = (exc.stderr or "").replace(token or "", "***")

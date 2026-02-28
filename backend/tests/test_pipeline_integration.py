@@ -127,7 +127,8 @@ class TestPipelineExecution:
         # Verify container lifecycle was called correctly
         mock_cs.run_agent_container.assert_called_once()
         mock_cs.wait_for_ready.assert_called_once_with(
-            "pioyan-agent-a1-ch1", host_port=32768,
+            "pioyan-agent-a1-ch1",
+            host_port=32768,
         )
         mock_cs.send_task.assert_called_once_with(
             container_name="pioyan-agent-a1-ch1",

@@ -207,7 +207,10 @@ class TestDockerFailures:
 
         task = await _get_task(db, task_id)
         assert task["status"] == TaskStatus.failed
-        assert "docker" in task["result_summary"].lower() or "connect" in task["result_summary"].lower()
+        assert (
+            "docker" in task["result_summary"].lower()
+            or "connect" in task["result_summary"].lower()
+        )
         assert task["completed_at"] is not None
 
     async def test_docker_image_not_found(self, auth_client: AsyncClient):
@@ -232,7 +235,10 @@ class TestDockerFailures:
 
         task = await _get_task(db, task_id)
         assert task["status"] == TaskStatus.failed
-        assert "image" in task["result_summary"].lower() or "not found" in task["result_summary"].lower()
+        assert (
+            "image" in task["result_summary"].lower()
+            or "not found" in task["result_summary"].lower()
+        )
 
     async def test_docker_api_error(self, auth_client: AsyncClient):
         """Docker API returns a server error → task failed."""
@@ -272,7 +278,9 @@ class TestDockerFailures:
 
         task = await _get_task(db, task_id)
         assert task["status"] == TaskStatus.failed
-        assert "timeout" in task["result_summary"].lower() or "ready" in task["result_summary"].lower()
+        assert (
+            "timeout" in task["result_summary"].lower() or "ready" in task["result_summary"].lower()
+        )
         mock_cs.cleanup_container.assert_called_once()
 
     async def test_cleanup_error_does_not_propagate(self, auth_client: AsyncClient):
@@ -316,9 +324,12 @@ class TestInvalidToken:
                 side_effect=httpx.HTTPStatusError(
                     "Authentication failed: git clone returned exit code 128",
                     request=httpx.Request("POST", "http://localhost:32768/task"),
-                    response=httpx.Response(500, json={
-                        "error": "git clone failed: Authentication failed for https://github.com/..."
-                    }),
+                    response=httpx.Response(
+                        500,
+                        json={
+                            "error": "git clone failed: Authentication failed for https://github.com/..."
+                        },
+                    ),
                 ),
             ),
         )
@@ -343,9 +354,9 @@ class TestInvalidToken:
                 side_effect=httpx.HTTPStatusError(
                     "PR creation failed: HTTP 401, message: Bad credentials",
                     request=httpx.Request("POST", "http://localhost:32768/task"),
-                    response=httpx.Response(500, json={
-                        "error": "gh pr create: HTTP 401, message: Bad credentials"
-                    }),
+                    response=httpx.Response(
+                        500, json={"error": "gh pr create: HTTP 401, message: Bad credentials"}
+                    ),
                 ),
             ),
         )
@@ -383,7 +394,10 @@ class TestTimeoutScenarios:
 
         task = await _get_task(db, task_id)
         assert task["status"] == TaskStatus.failed
-        assert "timeout" in task["result_summary"].lower() or "timed out" in task["result_summary"].lower()
+        assert (
+            "timeout" in task["result_summary"].lower()
+            or "timed out" in task["result_summary"].lower()
+        )
         mock_cs.cleanup_container.assert_called_once()
 
     async def test_health_check_timeout(self, auth_client: AsyncClient):
@@ -402,7 +416,9 @@ class TestTimeoutScenarios:
 
         task = await _get_task(db, task_id)
         assert task["status"] == TaskStatus.failed
-        assert "timeout" in task["result_summary"].lower() or "ready" in task["result_summary"].lower()
+        assert (
+            "timeout" in task["result_summary"].lower() or "ready" in task["result_summary"].lower()
+        )
         # Container registration and cleanup still happen
         mock_cs.run_agent_container.assert_called_once()
         mock_cs.cleanup_container.assert_called_once()
@@ -558,7 +574,9 @@ class TestEdgeCases:
 
         task = await _get_task(db, task_id)
         assert task["status"] == TaskStatus.failed
-        assert "port" in task["result_summary"].lower() or "mapping" in task["result_summary"].lower()
+        assert (
+            "port" in task["result_summary"].lower() or "mapping" in task["result_summary"].lower()
+        )
 
     async def test_http_422_from_agent_runtime(self, auth_client: AsyncClient):
         """Agent runtime returns 422 (bad request) → task failed."""

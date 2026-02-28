@@ -215,9 +215,7 @@ class ContainerService:
             ports = container.attrs["NetworkSettings"]["Ports"]
             bindings = ports.get("8080/tcp")
             if not bindings:
-                raise RuntimeError(
-                    f"No port mapping found for container {container_id[:12]}"
-                )
+                raise RuntimeError(f"No port mapping found for container {container_id[:12]}")
             return int(bindings[0]["HostPort"])
 
         return await asyncio.to_thread(_inspect)

@@ -162,7 +162,8 @@ class Orchestrator:
 
             # ── 5. Wait for agent runtime to be ready ─────────────
             ready = await container_service.wait_for_ready(
-                container_name, host_port=host_port,
+                container_name,
+                host_port=host_port,
             )
             if not ready:
                 await _update_task(

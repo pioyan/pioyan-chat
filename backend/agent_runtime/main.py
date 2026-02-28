@@ -66,9 +66,7 @@ class TaskHandler(BaseHTTPRequestHandler):
         try:
             import asyncio
 
-            result = asyncio.run(
-                self._execute_task(instruction, task_id, auto_commit, create_pr)
-            )
+            result = asyncio.run(self._execute_task(instruction, task_id, auto_commit, create_pr))
             self._respond(200, result)
         except Exception as e:
             logger.exception("Task execution failed")
