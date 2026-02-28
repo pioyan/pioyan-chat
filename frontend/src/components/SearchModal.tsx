@@ -8,7 +8,9 @@ import { useChatStore } from "@/stores/chatStore";
 import type { Message } from "@/types";
 
 export default function SearchModal() {
-  const { searchOpen, setSearchOpen, setCurrentChannel } = useChatStore();
+  const { searchOpen, setSearchOpen, setCurrentChannel, channels } =
+    useChatStore();
+  const channelMap = new Map(channels.map((c) => [c.id, c.name]));
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,7 +76,9 @@ export default function SearchModal() {
               onClick={() => handleSelect(msg)}
               className="w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-b border-zinc-100 dark:border-zinc-800"
             >
-              <p className="text-xs text-zinc-400 mb-1">#{msg.channel_id}</p>
+              <p className="text-xs text-zinc-400 mb-1">
+                #{channelMap.get(msg.channel_id) ?? msg.channel_id}
+              </p>
               <p className="text-sm text-zinc-900 dark:text-zinc-100 line-clamp-2">
                 {msg.content}
               </p>

@@ -2,8 +2,11 @@
 /** モーダル: ユーザープロフィールを編集する */
 
 import { useEffect, useRef, useState } from "react";
-import { X, User, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { X, User, Upload, LogOut } from "lucide-react";
 import { authApi } from "@/lib/api";
+import { removeToken } from "@/lib/auth";
+import { useChatStore } from "@/stores/chatStore";
 import type { User as UserType } from "@/types";
 
 interface Props {
@@ -13,6 +16,8 @@ interface Props {
 }
 
 export default function ProfileModal({ user, onClose, onUpdated }: Props) {
+  const router = useRouter();
+  const { setCurrentUser, setChannels, setCurrentChannel } = useChatStore();
   const [username, setUsername] = useState(user.username);
   const [avatarUrl, setAvatarUrl] = useState(user.avatar_url ?? "");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -71,6 +76,15 @@ export default function ProfileModal({ user, onClose, onUpdated }: Props) {
   const displayName = user.username || user.email;
   const avatarLetter = displayName[0]?.toUpperCase() ?? "?";
   const previewSrc = avatarPreview ?? (avatarUrl || null);
+
+  const handleLogout = () => {
+    removeToken();
+    setCurrentUser(null);
+    setChannels([]);
+    setCurrentChannel(null);
+    onClose();
+    router.push("/login");
+  };
 
   return (
     <div
@@ -163,21 +177,31 @@ export default function ProfileModal({ user, onClose, onUpdated }: Props) {
           {error && <p className="text-xs text-red-500">{error}</p>}
           {success && <p className="text-xs text-green-500">更新しました！</p>}
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-between items-center pt-2">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+              onClick={handleLogout}
+              className="flex items-center gap-1 px-4 py-2 text-sm rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
-              キャンセル
+              <LogOut size={14} />
+              ログアウト
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 text-sm rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "保存中…" : "保存"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+              >
+                キャンセル
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 text-sm rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "保存中…" : "保存"}
+              </button>
+            </div>
           </div>
         </form>
       </div>
