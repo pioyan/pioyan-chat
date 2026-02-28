@@ -11,6 +11,9 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import close_connection, get_db
 from app.routers import auth, bots, channels, dm, files
+from app.routers.agents import router as agents_router
+from app.routers.coding_channels import router as coding_channels_router
+from app.routers.coding_tasks import router as coding_tasks_router
 from app.routers.messages import channel_messages_router
 from app.routers.messages import router as messages_router
 from app.sockets import register_handlers
@@ -24,6 +27,9 @@ async def lifespan(app: FastAPI):
     await db["messages"].create_index("channel_id")
     await db["channels"].create_index("name")
     await db["bots"].create_index("owner_id")
+    await db["agents"].create_index("owner_id")
+    await db["agent_containers"].create_index([("agent_id", 1), ("channel_id", 1)])
+    await db["coding_tasks"].create_index("channel_id")
     yield
     # Shutdown: close DB connection
     await close_connection()
@@ -58,6 +64,9 @@ app.include_router(messages_router, prefix="/api/messages", tags=["messages"])
 app.include_router(dm.router, prefix="/api/dm", tags=["dm"])
 app.include_router(files.router, prefix="/api/files", tags=["files"])
 app.include_router(bots.router, prefix="/api/bots", tags=["bots"])
+app.include_router(agents_router, prefix="/api/agents", tags=["agents"])
+app.include_router(coding_channels_router, prefix="/api/channels", tags=["coding-channels"])
+app.include_router(coding_tasks_router, prefix="/api/channels", tags=["coding-tasks"])
 
 
 @app.get("/health")

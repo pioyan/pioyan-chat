@@ -22,7 +22,13 @@ def _doc_to_channel(doc: dict) -> ChannelPublic:
         description=doc.get("description"),
         is_private=doc.get("is_private", False),
         is_direct=doc.get("is_direct", False),
+        is_coding=doc.get("is_coding", False),
         members=[str(m) for m in doc.get("members", [])],
+        repo_url=doc.get("repo_url"),
+        repo_owner=doc.get("repo_owner"),
+        repo_name=doc.get("repo_name"),
+        default_branch=doc.get("default_branch", "main"),
+        assigned_agents=[str(a) for a in doc.get("assigned_agents", [])],
         created_by=str(doc["created_by"]),
         created_at=doc["created_at"],
     )
