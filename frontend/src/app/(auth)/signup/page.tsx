@@ -98,7 +98,10 @@ export default function SignupPage() {
         </form>
         <p className="mt-5 text-sm text-center text-gray-500">
           すでにアカウントをお持ちの方は{" "}
-          <Link href="/login" className="text-violet-600 hover:text-fuchsia-600 font-medium transition-colors">
+          <Link
+            href="/login"
+            className="text-violet-600 hover:text-fuchsia-600 font-medium transition-colors"
+          >
             ログイン
           </Link>
         </p>

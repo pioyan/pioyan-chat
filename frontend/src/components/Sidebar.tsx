@@ -58,7 +58,9 @@ export default function Sidebar({
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shrink-0">
               <MessageCircle size={14} className="text-white" />
             </div>
-            <h1 className="font-bold text-white text-base tracking-tight">pioyan-chat</h1>
+            <h1 className="font-bold text-white text-base tracking-tight">
+              pioyan-chat
+            </h1>
           </div>
         </div>
 

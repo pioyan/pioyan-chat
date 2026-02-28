@@ -78,7 +78,10 @@ export default function LoginPage() {
         </form>
         <p className="mt-5 text-sm text-center text-gray-500">
           アカウントをお持ちでない方は{" "}
-          <Link href="/signup" className="text-violet-600 hover:text-fuchsia-600 font-medium transition-colors">
+          <Link
+            href="/signup"
+            className="text-violet-600 hover:text-fuchsia-600 font-medium transition-colors"
+          >
             サインアップ
           </Link>
         </p>
