@@ -20,7 +20,7 @@ export default function MessageItem({ message, onThreadClick }: Props) {
   const avatarLetter = displayName[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="group flex gap-3 px-4 py-1 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded relative">
+    <div className="group flex gap-3 px-4 py-2 rounded-lg hover:bg-violet-50/40 dark:hover:bg-violet-950/20 border-l-2 border-transparent hover:border-violet-300/50 transition-all duration-150 relative">
       {/* Avatar */}
       {message.sender_avatar_url ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -30,7 +30,7 @@ export default function MessageItem({ message, onThreadClick }: Props) {
           className="mt-1 shrink-0 w-8 h-8 rounded-full object-cover"
         />
       ) : (
-        <div className="mt-1 shrink-0 w-8 h-8 rounded-full bg-violet-500 flex items-center justify-center text-white text-xs font-bold">
+        <div className="mt-1 shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-md ring-2 ring-white/10 dark:ring-gray-800/30">
           {avatarLetter}
         </div>
       )}
@@ -77,7 +77,7 @@ export default function MessageItem({ message, onThreadClick }: Props) {
       {!message.thread_id && (
         <button
           onClick={() => onThreadClick(message.id)}
-          className="absolute top-1 right-2 hidden group-hover:flex items-center gap-1 px-2 py-1 text-xs text-zinc-500 hover:text-violet-600 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded shadow-sm"
+          className="absolute top-1 right-2 hidden group-hover:flex items-center gap-1 px-2.5 py-1.5 text-xs text-gray-500 hover:text-violet-600 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-violet-200/40 dark:border-violet-700/30 hover:border-violet-400/60 rounded-lg shadow-md transition-all duration-150"
           aria-label="スレッドで返信"
         >
           <MessageSquare size={12} />

@@ -4,6 +4,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MessageSquare } from "lucide-react";
 import { authApi } from "@/lib/api";
 import { saveToken } from "@/lib/auth";
 

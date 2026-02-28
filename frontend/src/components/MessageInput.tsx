@@ -67,13 +67,13 @@ export default function MessageInput({
   };
 
   return (
-    <div className="border-t border-zinc-200 dark:border-zinc-700 px-4 py-3">
-      <div className="flex items-end gap-2 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded-lg px-3 py-2">
+    <div className="border-t border-gray-200/50 dark:border-gray-700/30 px-4 py-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+      <div className="flex items-end gap-2 bg-white/80 dark:bg-gray-800/60 border border-gray-200/70 dark:border-gray-700/40 rounded-xl px-3 py-2.5 input-glow transition-all duration-200">
         {/* File upload button */}
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="text-zinc-400 hover:text-violet-600 transition-colors"
+          className="text-gray-400 hover:text-violet-500 transition-colors"
           aria-label="ファイル添付"
         >
           <Paperclip size={18} />
@@ -102,7 +102,7 @@ export default function MessageInput({
           type="button"
           onClick={() => void handleSend()}
           disabled={!text.trim() || sending}
-          className="text-violet-600 disabled:text-zinc-300 hover:text-violet-700 transition-colors"
+          className="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-violet-500 to-fuchsia-500 disabled:from-gray-300 disabled:to-gray-300 dark:disabled:from-gray-700 dark:disabled:to-gray-700 text-white rounded-lg shadow-md disabled:shadow-none hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-150 disabled:cursor-not-allowed"
           aria-label="送信"
         >
           <Send size={18} />
