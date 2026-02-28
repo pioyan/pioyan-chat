@@ -1,17 +1,12 @@
 "use client";
 /** Left sidebar: channel list + DM list. */
 
-import {
-  Hash,
-  Lock,
-  MessageCircle,
-  Plus,
-  Settings,
-} from "lucide-react";
+import { Code2, Hash, Lock, MessageCircle, Plus, Settings } from "lucide-react";
 import { useState } from "react";
 import type { Channel, User } from "@/types";
 import { useChatStore } from "@/stores/chatStore";
 import CreateChannelModal from "./CreateChannelModal";
+import CreateCodingChannelModal from "./CreateCodingChannelModal";
 import type { NavSection } from "./AppNavBar";
 
 interface Props {
@@ -36,14 +31,22 @@ export default function Sidebar({
 }: Props) {
   const { setCurrentChannel } = useChatStore();
   const [createChannelOpen, setCreateChannelOpen] = useState(false);
+  const [createCodingOpen, setCreateCodingOpen] = useState(false);
 
-  const publicChannels = channels.filter((c) => !c.is_private && !c.is_direct);
-  const privateChannels = channels.filter((c) => c.is_private && !c.is_direct);
+  const publicChannels = channels.filter(
+    (c) => !c.is_private && !c.is_direct && !c.is_coding,
+  );
+  const privateChannels = channels.filter(
+    (c) => c.is_private && !c.is_direct && !c.is_coding,
+  );
+  const codingChannels = channels.filter((c) => c.is_coding);
 
-  const itemClass = (id: string) =>
+  const itemClass = (id: string, isCoding = false) =>
     `flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer text-sm transition-all duration-150 ${
       currentChannelId === id
-        ? "bg-gradient-to-r from-violet-600/80 to-fuchsia-600/60 text-white shadow-md"
+        ? isCoding
+          ? "bg-gradient-to-r from-cyan-600/80 to-violet-600/60 text-white shadow-md"
+          : "bg-gradient-to-r from-violet-600/80 to-fuchsia-600/60 text-white shadow-md"
         : "text-gray-400 hover:bg-white/8 hover:text-gray-100"
     }`;
 
@@ -58,7 +61,11 @@ export default function Sidebar({
         {/* セクションヘッダー */}
         <div className="px-4 py-3 border-b border-white/5">
           <h2 className="font-semibold text-sm text-gray-200 tracking-tight">
-            {activeSection === "channels" ? "チャンネル" : "ダイレクトメッセージ"}
+            {activeSection === "channels"
+              ? "チャンネル"
+              : activeSection === "dms"
+                ? "ダイレクトメッセージ"
+                : "ボット管理"}
           </h2>
         </div>
 
@@ -112,16 +119,54 @@ export default function Sidebar({
                   ))}
                 </>
               )}
+              {/* コーディングチャンネル */}
+              <div className="px-3 pt-3 pb-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest select-none">
+                    コーディング
+                  </span>
+                  <button
+                    className="text-gray-500 hover:text-white transition-colors"
+                    aria-label="コーディングチャンネル追加"
+                    onClick={() => setCreateCodingOpen(true)}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+              {codingChannels.map((ch) => (
+                <div
+                  key={ch.id}
+                  className={itemClass(ch.id, true)}
+                  onClick={() => setCurrentChannel(ch.id)}
+                >
+                  <Code2
+                    size={14}
+                    className={
+                      currentChannelId === ch.id
+                        ? "text-cyan-200"
+                        : "text-cyan-500"
+                    }
+                  />
+                  <span className="flex-1 truncate">{ch.name}</span>
+                  {ch.repo_name && currentChannelId !== ch.id && (
+                    <span className="text-[10px] text-gray-500 font-mono truncate max-w-[5rem] shrink-0">
+                      {ch.repo_name}
+                    </span>
+                  )}
+                </div>
+              ))}
             </>
           ) : (
             <>
               {/* DM リスト */}
               {dms.length === 0 ? (
                 <div className="px-4 py-6 text-center">
-                  <MessageCircle size={32} className="mx-auto text-gray-600 mb-2" />
-                  <p className="text-xs text-gray-500">
-                    まだ DM はありません
-                  </p>
+                  <MessageCircle
+                    size={32}
+                    className="mx-auto text-gray-600 mb-2"
+                  />
+                  <p className="text-xs text-gray-500">まだ DM はありません</p>
                 </div>
               ) : (
                 dms.map((dm) => (
@@ -174,6 +219,16 @@ export default function Sidebar({
           onCreated={(ch) => {
             onChannelCreated(ch);
             setCreateChannelOpen(false);
+          }}
+        />
+      )}
+
+      {createCodingOpen && (
+        <CreateCodingChannelModal
+          onClose={() => setCreateCodingOpen(false)}
+          onCreated={(ch) => {
+            onChannelCreated(ch);
+            setCreateCodingOpen(false);
           }}
         />
       )}

@@ -127,7 +127,7 @@ pioyan-chat/
 - [x] `frontend/src/types/index.ts` — Bot 型定義追加
 - [x] `frontend/src/lib/api.ts` — botsApi クライアント追加
 - [ ] ボット実行エンジン（コンテナビルド + Copilot SDK 統合）
-- [ ] ボット管理 UI（フロントエンド）
+- [x] ボット管理 UI（フロントエンド）
 
 ## API エンドポイント一覧
 

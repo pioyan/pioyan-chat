@@ -2,7 +2,7 @@
 /** Zustand store for pioyan-chat. */
 
 import { create } from "zustand";
-import type { Channel, Message, User } from "@/types";
+import type { Agent, Channel, CodingTask, Message, User } from "@/types";
 
 interface ChatState {
   // Data
@@ -10,6 +10,11 @@ interface ChatState {
   currentChannelId: string | null;
   messages: Record<string, Message[]>; // channelId → messages
   currentUser: User | null;
+
+  // Coding channel data
+  channelAgents: Record<string, Agent[]>; // channelId → agents
+  channelTasks: Record<string, CodingTask[]>; // channelId → tasks
+  agentPanelOpen: boolean;
 
   // UI
   sidebarOpen: boolean;
@@ -27,6 +32,13 @@ interface ChatState {
   toggleSidebar: () => void;
   setThreadMessageId: (id: string | null) => void;
   setSearchOpen: (open: boolean) => void;
+
+  // Coding actions
+  setChannelAgents: (channelId: string, agents: Agent[]) => void;
+  setChannelTasks: (channelId: string, tasks: CodingTask[]) => void;
+  addCodingTask: (task: CodingTask) => void;
+  updateCodingTask: (task: CodingTask) => void;
+  setAgentPanelOpen: (open: boolean) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -34,6 +46,9 @@ export const useChatStore = create<ChatState>((set) => ({
   currentChannelId: null,
   messages: {},
   currentUser: null,
+  channelAgents: {},
+  channelTasks: {},
+  agentPanelOpen: false,
   sidebarOpen: true,
   threadMessageId: null,
   searchOpen: false,
@@ -75,4 +90,35 @@ export const useChatStore = create<ChatState>((set) => ({
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setThreadMessageId: (id) => set({ threadMessageId: id }),
   setSearchOpen: (open) => set({ searchOpen: open }),
+
+  // Coding actions
+  setChannelAgents: (channelId, agents) =>
+    set((state) => ({
+      channelAgents: { ...state.channelAgents, [channelId]: agents },
+    })),
+  setChannelTasks: (channelId, tasks) =>
+    set((state) => ({
+      channelTasks: { ...state.channelTasks, [channelId]: tasks },
+    })),
+  addCodingTask: (task) =>
+    set((state) => {
+      const existing = state.channelTasks[task.channel_id] ?? [];
+      return {
+        channelTasks: {
+          ...state.channelTasks,
+          [task.channel_id]: [task, ...existing],
+        },
+      };
+    }),
+  updateCodingTask: (task) =>
+    set((state) => {
+      const existing = state.channelTasks[task.channel_id] ?? [];
+      return {
+        channelTasks: {
+          ...state.channelTasks,
+          [task.channel_id]: existing.map((t) => (t.id === task.id ? task : t)),
+        },
+      };
+    }),
+  setAgentPanelOpen: (open) => set({ agentPanelOpen: open }),
 }));
