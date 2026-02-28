@@ -121,7 +121,7 @@ export default function ChatPage() {
             <MessageInput channelId={currentChannelId} />
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-zinc-400">
+          <div className="flex-1 flex items-center justify-center text-gray-400">
             <p>チャンネルを選択してください</p>
           </div>
         )}

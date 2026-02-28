@@ -93,7 +93,7 @@ export default function MessageInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder ?? "メッセージを入力..."}
           rows={1}
-          className="flex-1 resize-none bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 outline-none"
+          className="flex-1 resize-none bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none"
           aria-label="メッセージ"
         />
 

@@ -38,10 +38,10 @@ export default function MessageItem({ message, onThreadClick }: Props) {
       <div className="flex-1 min-w-0">
         {/* Header */}
         <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+          <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
             {displayName}
           </span>
-          <span className="text-xs text-zinc-400">{time}</span>
+          <span className="text-xs text-gray-400">{time}</span>
         </div>
 
         {/* Content */}

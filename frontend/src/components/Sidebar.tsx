@@ -79,7 +79,7 @@ export default function Sidebar({
                 チャンネル
               </span>
               <button
-                className="text-zinc-400 hover:text-white"
+                className="text-gray-500 hover:text-white transition-colors"
                 aria-label="チャンネル追加"
                 onClick={() => setCreateChannelOpen(true)}
               >
@@ -102,7 +102,7 @@ export default function Sidebar({
           {privateChannels.length > 0 && (
             <>
               <div className="px-3 pt-3 pb-1">
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
                   プライベート
                 </span>
               </div>
@@ -123,7 +123,7 @@ export default function Sidebar({
           {dms.length > 0 && (
             <>
               <div className="px-3 pt-3 pb-1">
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
                   ダイレクトメッセージ
                 </span>
               </div>
